@@ -10,15 +10,14 @@ const FALLBACK_COLORS = [
   { bg: '#FBE9E7', body: '#F4511E', accent: '#FFAB91' },
 ];
 
-export function LetterCard({ letter, size = 'md', onClick, showName = true, animate = true }) {
+export function LetterCard({ letter, size = 'md', onClick, showName = true }) {
   const { speakLetter, isPlaying } = useAudio();
   const c = LETTER_COLORS[letter.arabic] || FALLBACK_COLORS[(letter.id - 1) % FALLBACK_COLORS.length];
 
-  const imgSize = size === 'sm' ? 90 : size === 'lg' ? 160 : 120;
-  const padding = size === 'sm' ? 8 : 12;
+  const arabicFontSize = size === 'sm' ? 52 : size === 'lg' ? 96 : 72;
+  const illustrationSize = size === 'sm' ? 48 : size === 'lg' ? 72 : 56;
 
   const handleTap = () => {
-    // Speak the Urdu name (e.g. 'بے') with ur-PK TTS → says "Bay" not "Baa"
     speakLetter(letter.urdu || letter.arabic);
     if (onClick) onClick(letter);
   };
@@ -26,19 +25,59 @@ export function LetterCard({ letter, size = 'md', onClick, showName = true, anim
   return (
     <motion.div
       className="letter-card rounded-3xl flex flex-col items-center select-none"
-      style={{ backgroundColor: 'white', padding, cursor: 'pointer' }}
+      style={{
+        backgroundColor: c.bg,
+        border: `2.5px solid ${c.body}30`,
+        boxShadow: `0 6px 0 ${c.body}25`,
+        padding: size === 'sm' ? '10px 8px' : '14px 12px',
+        cursor: 'pointer',
+        minWidth: size === 'sm' ? 90 : size === 'lg' ? 160 : 120,
+      }}
       onClick={handleTap}
       whileTap={{ scale: 0.92 }}
       whileHover={{ scale: 1.06, y: -4 }}
     >
-      <LetterIllustration letter={letter} size={imgSize} />
+      {/* ── Actual Arabic letter — always shown large ── */}
+      <motion.div
+        animate={isPlaying ? { scale: [1, 1.08, 1] } : {}}
+        transition={{ duration: 0.5, repeat: isPlaying ? Infinity : 0 }}
+        style={{
+          fontFamily: 'Amiri, serif',
+          fontSize: arabicFontSize,
+          color: c.body,
+          lineHeight: 1.2,
+          direction: 'rtl',
+          fontWeight: 'bold',
+          textShadow: `0 2px 8px ${c.body}40`,
+        }}
+      >
+        {letter.arabic}
+      </motion.div>
+
+      {/* ── Small illustration as decoration ── */}
+      <div style={{ opacity: 0.7, marginTop: 2 }}>
+        <LetterIllustration letter={letter} size={illustrationSize} />
+      </div>
 
       {showName && (
         <div className="text-center mt-2">
-          <p className="font-extrabold text-sm leading-tight" style={{ color: c.body, fontFamily: 'Fredoka One, cursive' }}>
+          {/* English name */}
+          <p className="font-extrabold leading-tight" style={{
+            color: c.body,
+            fontFamily: 'Fredoka One, cursive',
+            fontSize: size === 'sm' ? '11px' : '13px',
+          }}>
             {letter.name}
           </p>
-          <p className="text-xs mt-0.5" style={{ color: c.body, fontFamily: 'Noto Nastaliq Urdu, serif', opacity: 0.8, direction: 'rtl' }}>
+          {/* Urdu name */}
+          <p style={{
+            color: c.body,
+            fontFamily: 'Noto Nastaliq Urdu, serif',
+            fontSize: size === 'sm' ? '10px' : '12px',
+            opacity: 0.75,
+            direction: 'rtl',
+            marginTop: 1,
+          }}>
             {letter.urdu}
           </p>
         </div>
@@ -46,7 +85,8 @@ export function LetterCard({ letter, size = 'md', onClick, showName = true, anim
 
       {/* Sound indicator */}
       <motion.div
-        className="mt-1 text-lg"
+        className="mt-1"
+        style={{ fontSize: size === 'sm' ? '14px' : '16px' }}
         animate={isPlaying ? { scale: [1, 1.4, 1] } : {}}
         transition={{ duration: 0.4, repeat: isPlaying ? Infinity : 0 }}
       >
