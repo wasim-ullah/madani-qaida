@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
+@import "tailwindcss";
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #E8F4FD;
+  font-family: 'Nunito', sans-serif;
+  overscroll-behavior: none;
+}
+
+#root {
+  width: 100%;
+  min-height: 100svh;
+}
+
+.arabic {
+  font-family: 'Amiri', serif;
+  direction: rtl;
+}
+.urdu {
+  font-family: 'Noto Nastaliq Urdu', serif;
+  direction: rtl;
+}
+.kids-font {
+  font-family: 'Fredoka One', cursive;
+}
+
+/* ── Harakat colour system ─────────── */
+.zabar-bg  { background-color: #FFF3E0; }
+.zer-bg    { background-color: #E3F2FD; }
+.pesh-bg   { background-color: #E8F5E9; }
+.zabar-text { color: #E65100; }
+.zer-text   { color: #1565C0; }
+.pesh-text  { color: #2E7D32; }
+
+/* ── Cartoon card bounce ─────────────  */
+@keyframes wiggle {
+  0%,100% { transform: rotate(-3deg); }
+  50%      { transform: rotate(3deg); }
+}
+.wiggle { animation: wiggle 0.5s ease-in-out; }
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.float { animation: float 3s ease-in-out infinite; }
+
+@keyframes pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+.pop { animation: pop 0.3s ease; }
+
+/* ── Scrollbars ───────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #B0D4F1; border-radius: 3px; }
+
+/* ── Dotted sky background ──────────  */
+.sky-bg {
+  background-color: #E8F4FD;
+  background-image: radial-gradient(circle, #b8d8f0 1.5px, transparent 1.5px);
+  background-size: 28px 28px;
+}
+
+/* ── Grass strip ────────────────────  */
+.grass-strip {
+  background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
+  border-radius: 50% 50% 0 0 / 20px 20px 0 0;
+}
+
+/* ── Letter card shadow ─────────────  */
+.letter-card {
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.15));
+  transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), filter 0.2s;
+  cursor: pointer;
+}
+.letter-card:hover  { transform: translateY(-4px) scale(1.05); }
+.letter-card:active { transform: scale(0.95); }
+
+/* ── Bubble button ──────────────────  */
+.bubble-btn {
+  border-radius: 50px;
+  font-family: 'Fredoka One', cursive;
+  letter-spacing: 0.5px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 5px 0 rgba(0,0,0,0.18);
+}
+.bubble-btn:hover  { transform: translateY(-2px); box-shadow: 0 7px 0 rgba(0,0,0,0.18); }
+.bubble-btn:active { transform: translateY(2px);  box-shadow: 0 2px 0 rgba(0,0,0,0.18); }
+
+/* ── Web layout sidebar ─────────────  */
+@media (min-width: 768px) {
+  .app-shell {
+    display: flex;
+    height: 100svh;
+    overflow: hidden;
+  }
+  .sidebar { display: flex !important; }
+  .bottom-nav { display: none !important; }
+  .page-scroll { height: 100svh; overflow-y: auto; }
+}
+@media (max-width: 767px) {
+  .app-shell { display: block; }
+  .sidebar { display: none !important; }
+  .bottom-nav { display: flex !important; }
+  .page-scroll { height: calc(100svh - 116px); overflow-y: auto; }
+}
