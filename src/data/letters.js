@@ -3,15 +3,15 @@ export const LETTERS = [
     forms: { isolated: 'ا', initial: 'ا',  medial: 'ـا',  final: 'ـا'  },
     example: 'أَسَد',   exampleMeaning: 'Lion',     dots: 0, shape: 'alif' },
 
-  { id: 2,  arabic: 'ب', name: 'Bay',   urdu: 'بے',   makhraj: 'lips',   group: 1,
+  { id: 2,  arabic: 'ب', name: 'Baa',   urdu: 'بے',   makhraj: 'lips',   group: 1,
     forms: { isolated: 'ب', initial: 'بـ', medial: 'ـبـ', final: 'ـب'  },
     example: 'بَيْت',   exampleMeaning: 'House',    dots: 1, dotsPos: 'below', shape: 'ba' },
 
-  { id: 3,  arabic: 'ت', name: 'Tay',   urdu: 'تے',   makhraj: 'teeth',  group: 1,
+  { id: 3,  arabic: 'ت', name: 'Taa',   urdu: 'تے',   makhraj: 'teeth',  group: 1,
     forms: { isolated: 'ت', initial: 'تـ', medial: 'ـتـ', final: 'ـت'  },
     example: 'تِين',    exampleMeaning: 'Fig',       dots: 2, dotsPos: 'above', shape: 'ta' },
 
-  { id: 4,  arabic: 'ث', name: 'Say',   urdu: 'ثے',   makhraj: 'teeth',  group: 1,
+  { id: 4,  arabic: 'ث', name: 'Thaa',   urdu: 'ثے',   makhraj: 'teeth',  group: 1,
     forms: { isolated: 'ث', initial: 'ثـ', medial: 'ـثـ', final: 'ـث'  },
     example: 'ثَوْب',   exampleMeaning: 'Cloth',     dots: 3, dotsPos: 'above', shape: 'tha' },
 
@@ -19,11 +19,11 @@ export const LETTERS = [
     forms: { isolated: 'ج', initial: 'جـ', medial: 'ـجـ', final: 'ـج'  },
     example: 'جَمَل',   exampleMeaning: 'Camel',     dots: 1, dotsPos: 'below', shape: 'jim' },
 
-  { id: 6,  arabic: 'ح', name: 'Hay',   urdu: 'حے',   makhraj: 'throat', group: 2,
+  { id: 6,  arabic: 'ح', name: 'Haa',   urdu: 'حے',   makhraj: 'throat', group: 2,
     forms: { isolated: 'ح', initial: 'حـ', medial: 'ـحـ', final: 'ـح'  },
     example: 'حَمَام',  exampleMeaning: 'Dove',      dots: 0, shape: 'ha' },
 
-  { id: 7,  arabic: 'خ', name: 'Khay',  urdu: 'خے',   makhraj: 'throat', group: 2,
+  { id: 7,  arabic: 'خ', name: 'Khaa',  urdu: 'خے',   makhraj: 'throat', group: 2,
     forms: { isolated: 'خ', initial: 'خـ', medial: 'ـخـ', final: 'ـخ'  },
     example: 'خَيْل',   exampleMeaning: 'Horse',     dots: 1, dotsPos: 'above', shape: 'kha' },
 
@@ -31,15 +31,15 @@ export const LETTERS = [
     forms: { isolated: 'د', initial: 'د',  medial: 'ـد',  final: 'ـد'  },
     example: 'دَجَاجَة',exampleMeaning: 'Chicken',   dots: 0, shape: 'dal' },
 
-  { id: 9,  arabic: 'ذ', name: 'Zaal',  urdu: 'ذال',  makhraj: 'teeth',  group: 3,
+  { id: 9,  arabic: 'ذ', name: 'Dhaal',  urdu: 'ذال',  makhraj: 'teeth',  group: 3,
     forms: { isolated: 'ذ', initial: 'ذ',  medial: 'ـذ',  final: 'ـذ'  },
     example: 'ذَهَب',   exampleMeaning: 'Gold',      dots: 1, dotsPos: 'above', shape: 'dhal' },
 
-  { id: 10, arabic: 'ر', name: 'Ray',   urdu: 'رے',   makhraj: 'tongue', group: 4,
+  { id: 10, arabic: 'ر', name: 'Raa',   urdu: 'رے',   makhraj: 'tongue', group: 4,
     forms: { isolated: 'ر', initial: 'ر',  medial: 'ـر',  final: 'ـر'  },
     example: 'رَأْس',   exampleMeaning: 'Head',      dots: 0, shape: 'ra' },
 
-  { id: 11, arabic: 'ز', name: 'Zay',   urdu: 'زے',   makhraj: 'tongue', group: 4,
+  { id: 11, arabic: 'ز', name: 'Zaa',   urdu: 'زے',   makhraj: 'tongue', group: 4,
     forms: { isolated: 'ز', initial: 'ز',  medial: 'ـز',  final: 'ـز'  },
     example: 'زَيْتُون',exampleMeaning: 'Olive',     dots: 1, dotsPos: 'above', shape: 'zay' },
 
@@ -51,19 +51,19 @@ export const LETTERS = [
     forms: { isolated: 'ش', initial: 'شـ', medial: 'ـشـ', final: 'ـش'  },
     example: 'شَمْس',   exampleMeaning: 'Sun',       dots: 3, dotsPos: 'above', shape: 'shin' },
 
-  { id: 14, arabic: 'ص', name: 'Suaad', urdu: 'صاد',  makhraj: 'tongue', group: 6,
+  { id: 14, arabic: 'ص', name: 'Saad', urdu: 'صاد',  makhraj: 'tongue', group: 6,
     forms: { isolated: 'ص', initial: 'صـ', medial: 'ـصـ', final: 'ـص'  },
     example: 'صَبَاح',  exampleMeaning: 'Morning',   dots: 0, shape: 'sad' },
 
-  { id: 15, arabic: 'ض', name: 'Zuaad', urdu: 'ضاد',  makhraj: 'tongue', group: 6,
+  { id: 15, arabic: 'ض', name: 'Daad', urdu: 'ضاد',  makhraj: 'tongue', group: 6,
     forms: { isolated: 'ض', initial: 'ضـ', medial: 'ـضـ', final: 'ـض'  },
     example: 'ضَوْء',   exampleMeaning: 'Light',     dots: 1, dotsPos: 'above', shape: 'dad' },
 
-  { id: 16, arabic: 'ط', name: 'Toa',   urdu: 'طوأ',  makhraj: 'tongue', group: 7,
+  { id: 16, arabic: 'ط', name: 'Twaa',   urdu: 'طوأ',  makhraj: 'tongue', group: 7,
     forms: { isolated: 'ط', initial: 'طـ', medial: 'ـطـ', final: 'ـط'  },
     example: 'طَيْر',   exampleMeaning: 'Bird',      dots: 0, shape: 'taa', isQalqalah: true },
 
-  { id: 17, arabic: 'ظ', name: 'Zoa',   urdu: 'ظوأ',  makhraj: 'tongue', group: 7,
+  { id: 17, arabic: 'ظ', name: 'Dhaa',   urdu: 'ظوأ',  makhraj: 'tongue', group: 7,
     forms: { isolated: 'ظ', initial: 'ظـ', medial: 'ـظـ', final: 'ـظ'  },
     example: 'ظِل',     exampleMeaning: 'Shadow',    dots: 1, dotsPos: 'above', shape: 'dhaa' },
 
@@ -75,7 +75,7 @@ export const LETTERS = [
     forms: { isolated: 'غ', initial: 'غـ', medial: 'ـغـ', final: 'ـغ'  },
     example: 'غَيْم',   exampleMeaning: 'Cloud',     dots: 1, dotsPos: 'above', shape: 'ghain' },
 
-  { id: 20, arabic: 'ف', name: 'Fay',   urdu: 'فے',   makhraj: 'lips',   group: 9,
+  { id: 20, arabic: 'ف', name: 'Faa',   urdu: 'فے',   makhraj: 'lips',   group: 9,
     forms: { isolated: 'ف', initial: 'فـ', medial: 'ـفـ', final: 'ـف'  },
     example: 'فِيل',    exampleMeaning: 'Elephant',  dots: 1, dotsPos: 'above', shape: 'fa' },
 
@@ -99,11 +99,11 @@ export const LETTERS = [
     forms: { isolated: 'ن', initial: 'نـ', medial: 'ـنـ', final: 'ـن'  },
     example: 'نُور',    exampleMeaning: 'Light',     dots: 1, dotsPos: 'above', shape: 'nun' },
 
-  { id: 26, arabic: 'و', name: 'Waao',  urdu: 'واؤ',  makhraj: 'lips',   group: 11,
+  { id: 26, arabic: 'و', name: 'Waaw',  urdu: 'واؤ',  makhraj: 'lips',   group: 11,
     forms: { isolated: 'و', initial: 'و',  medial: 'ـو',  final: 'ـو'  },
     example: 'وَرَد',   exampleMeaning: 'Rose',      dots: 0, shape: 'waw' },
 
-  { id: 27, arabic: 'ه', name: 'Heh',   urdu: 'ہے',   makhraj: 'throat', group: 11,
+  { id: 27, arabic: 'ه', name: 'Haa',   urdu: 'ہے',   makhraj: 'throat', group: 11,
     forms: { isolated: 'ه', initial: 'هـ', medial: 'ـهـ', final: 'ـه'  },
     example: 'هِلَال',  exampleMeaning: 'Crescent',  dots: 0, shape: 'heh' },
 
@@ -111,7 +111,7 @@ export const LETTERS = [
     forms: { isolated: 'ء', initial: 'أ',  medial: 'ئـ',  final: 'ئ'   },
     example: 'أَسَد',   exampleMeaning: 'Lion',      dots: 0, shape: 'hamza' },
 
-  { id: 29, arabic: 'ي', name: 'Yay',   urdu: 'يے',   makhraj: 'tongue', group: 11,
+  { id: 29, arabic: 'ي', name: 'Yaa',   urdu: 'يے',   makhraj: 'tongue', group: 11,
     forms: { isolated: 'ي', initial: 'يـ', medial: 'ـيـ', final: 'ـي'  },
     example: 'يَد',     exampleMeaning: 'Hand',      dots: 2, dotsPos: 'below', shape: 'ya' },
 ];
