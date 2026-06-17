@@ -29,7 +29,7 @@ function LearnMode() {
             onClick={() => speak(h.example)}
             whileTap={{ scale: 0.93 }}
           >
-            <div style={{ fontFamily: 'Amiri, serif', fontSize: '48px', color: h.color, direction: 'rtl', lineHeight: 1.4 }}>
+            <div style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize: '48px', color: h.color, direction: 'rtl', lineHeight: 1.4 }}>
               {h.example}
             </div>
             <div className="font-bold text-sm" style={{ color: h.color, fontFamily: 'Nunito, sans-serif' }}>
@@ -63,7 +63,7 @@ function LearnMode() {
             onClick={() => setActiveLetter(l)}
             className="px-3 py-2 rounded-xl transition-all"
             style={{
-              fontFamily: 'Amiri, serif', fontSize: '24px',
+              fontFamily:'IndoPak Nastaleeq,serif', fontSize: '24px',
               backgroundColor: activeLetter.id === l.id ? '#1B4D6B' : '#F1F5F9',
               color: activeLetter.id === l.id ? '#D4A017' : '#1B4D6B',
               minWidth: '50px', textAlign: 'center',
@@ -86,7 +86,7 @@ function LearnMode() {
               onClick={() => speak(combined)}
               whileTap={{ scale: 0.9 }}
             >
-              <div style={{ fontFamily: 'Amiri, serif', fontSize: '40px', color: '#1B4D6B', direction: 'rtl', lineHeight: 1.4 }}>
+              <div style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize: '40px', color: '#1B4D6B', direction: 'rtl', lineHeight: 1.4 }}>
                 {combined}
               </div>
               <div className="text-xs font-bold" style={{ color: h.color, fontFamily: 'Nunito, sans-serif' }}>
@@ -173,7 +173,7 @@ function QuizMode() {
         className="rounded-3xl p-8 text-center mb-6"
         style={{ backgroundColor: 'white', boxShadow: '0 8px 32px rgba(27,77,107,0.15)' }}
       >
-        <div style={{ fontFamily: 'Amiri, serif', fontSize: '100px', color: '#1B4D6B', direction: 'rtl', lineHeight: 1.2 }}>
+        <div style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize: '100px', color: '#1B4D6B', direction: 'rtl', lineHeight: 1.2 }}>
           {current.combined}
         </div>
         <div className="text-sm mt-2 font-bold" style={{ color: '#64748B', fontFamily: 'Nunito, sans-serif' }}>
@@ -255,7 +255,7 @@ function BuildMode() {
       >
         {combined ? (
           <div>
-            <div style={{ fontFamily: 'Amiri, serif', fontSize: '80px', color: '#D4A017', direction: 'rtl', lineHeight: 1.3 }}>
+            <div style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize: '80px', color: '#D4A017', direction: 'rtl', lineHeight: 1.3 }}>
               {combined}
             </div>
             <div className="text-white text-sm mt-1" style={{ fontFamily: 'Nunito, sans-serif' }}>
@@ -266,7 +266,7 @@ function BuildMode() {
           <div className="text-center">
             <div className="text-4xl mb-2">
               {selectedLetter
-                ? <span style={{ fontFamily: 'Amiri, serif', color: '#1B4D6B' }}>{selectedLetter.arabic}</span>
+                ? <span style={{ fontFamily:'IndoPak Nastaleeq,serif', color: '#1B4D6B' }}>{selectedLetter.arabic}</span>
                 : '?'} + {selectedHarakat ? <span style={{ color: selectedHarakat.color }}>◌{selectedHarakat.arabic}</span> : '?'}
             </div>
             <div className="text-sm" style={{ color: '#94A3B8', fontFamily: 'Nunito, sans-serif' }}>
@@ -285,7 +285,7 @@ function BuildMode() {
             onClick={() => setSelectedLetter(l)}
             className="rounded-xl px-3 py-2 transition-all"
             style={{
-              fontFamily: 'Amiri, serif', fontSize: '26px',
+              fontFamily:'IndoPak Nastaleeq,serif', fontSize: '26px',
               backgroundColor: selectedLetter?.id === l.id ? '#1B4D6B' : 'white',
               color: selectedLetter?.id === l.id ? '#D4A017' : '#1B4D6B',
               border: '2px solid',
@@ -315,7 +315,7 @@ function BuildMode() {
               fontSize: '13px',
             }}
           >
-            <div style={{ fontFamily: 'Amiri, serif', fontSize: '24px', direction: 'rtl' }}>◌{h.arabic}</div>
+            <div style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize: '24px', direction: 'rtl' }}>◌{h.arabic}</div>
             <div>{h.name}</div>
           </button>
         ))}

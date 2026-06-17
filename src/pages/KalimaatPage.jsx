@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { TeacherMarkBadge } from '../components/ui/TeacherMark';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WORDS, THEMES } from '../data/words';
 import { useAudio } from '../hooks/useAudio';
@@ -38,14 +39,13 @@ function BrowseMode({ filter }) {
               <div className="text-3xl shrink-0">{word.icon}</div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <div style={{ fontFamily: 'Amiri, serif', fontSize: '32px', color: '#1B4D6B', direction: 'rtl' }}>
+                  <div style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize: '32px', color: '#1B4D6B', direction: 'rtl' }}>
                     {word.arabic}
                   </div>
                   <span className="text-xl">{expanded === word.id ? '▲' : '▼'}</span>
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className="font-bold text-sm" style={{ color: '#64748B', fontFamily: 'Nunito, sans-serif' }}>
-                    {word.transliteration}
                   </span>
                   <span className="text-sm" style={{ color: '#94A3B8', fontFamily: 'Nunito, sans-serif' }}>
                     — {word.meaning}
@@ -74,7 +74,7 @@ function BrowseMode({ filter }) {
                           key={i}
                           className="rounded-xl px-4 py-3"
                           style={{
-                            fontFamily: 'Amiri, serif', fontSize: '28px',
+                            fontFamily:'IndoPak Nastaleeq,serif', fontSize: '28px',
                             backgroundColor: 'white', border: '2px solid #1B4D6B', color: '#1B4D6B',
                           }}
                           onClick={(e) => { e.stopPropagation(); speakLetter(l); }}
@@ -191,7 +191,7 @@ function MatchGame() {
                 onClick={() => handleArabicSelect(word)}
                 className="rounded-xl py-4 px-3 text-center"
                 style={{
-                  fontFamily: 'Amiri, serif', fontSize: '28px', direction: 'rtl',
+                  fontFamily:'IndoPak Nastaleeq,serif', fontSize: '28px', direction: 'rtl',
                   backgroundColor: isMatched ? '#F0FDF4' : isWrong ? '#FEF2F2' : isSelected ? '#1B4D6B' : 'white',
                   color: isMatched ? '#22C55E' : isWrong ? '#EF4444' : isSelected ? '#D4A017' : '#1B4D6B',
                   border: `2px solid ${isMatched ? '#22C55E' : isWrong ? '#EF4444' : isSelected ? '#D4A017' : '#E2E8F0'}`,

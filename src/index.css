@@ -1,4 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap');
+/* ── IndoPak Nastaleeq — local copy with CDN fallback ─────────────────────── */
+@font-face {
+  font-family: 'IndoPak Nastaleeq';
+  src: url('/fonts/IndoPakNastaleeq.ttf') format('truetype'),
+       url('https://static-cdn.tarteel.ai/qul/fonts/nastaleeq/Hanafi/normal-v4.2.2/with-waqf-lazmi/font.ttf') format('truetype');
+  font-display: swap;
+}
+
 @import "tailwindcss";
 
 *, *::before, *::after {
@@ -19,14 +27,20 @@ body {
   min-height: 100svh;
 }
 
+/* ── Arabic typography — use everywhere Arabic text appears ─────────────── */
+.font-arabic {
+  font-family: 'IndoPak Nastaleeq', serif;
+  direction: rtl;
+  line-height: 2;        /* Nastaleeq needs extra leading */
+}
+
+/* Legacy aliases — keep so existing classes still work */
 .arabic {
-  font-family: 'Amiri', serif;
+  font-family: 'IndoPak Nastaleeq', serif;
   direction: rtl;
+  line-height: 2;
 }
-.urdu {
-  font-family: 'Noto Nastaliq Urdu', serif;
-  direction: rtl;
-}
+
 .kids-font {
   font-family: 'Fredoka One', cursive;
 }
@@ -71,12 +85,6 @@ body {
   background-size: 28px 28px;
 }
 
-/* ── Grass strip ────────────────────  */
-.grass-strip {
-  background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
-  border-radius: 50% 50% 0 0 / 20px 20px 0 0;
-}
-
 /* ── Letter card shadow ─────────────  */
 .letter-card {
   filter: drop-shadow(0 6px 12px rgba(0,0,0,0.15));
@@ -112,5 +120,18 @@ body {
   .app-shell { display: block; }
   .sidebar { display: none !important; }
   .bottom-nav { display: flex !important; }
-  .page-scroll { height: calc(100svh - 116px); overflow-y: auto; }
+  /* 56px bottom nav + safe area */
+  .page-scroll { height: calc(100svh - 56px); overflow-y: auto; padding-bottom: env(safe-area-inset-bottom, 0px); }
+}
+
+/* ── Mobile bottom nav ──────────────  */
+.bottom-nav {
+  height: 56px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Landscape phone: reduce nav height */
+@media (max-width: 767px) and (orientation: landscape) {
+  .bottom-nav { height: 48px; }
+  .page-scroll { height: calc(100svh - 48px); }
 }

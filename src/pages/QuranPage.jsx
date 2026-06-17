@@ -22,7 +22,7 @@ function WordChip({ word, onClick, isActive }) {
       onClick={() => onClick(word)}
       className="rounded-xl px-3 py-2 m-1 text-right"
       style={{
-        fontFamily: 'Amiri, serif',
+        fontFamily:'IndoPak Nastaleeq,serif',
         fontSize: '26px',
         direction: 'rtl',
         backgroundColor: isActive ? '#1B4D6B' : hasTajweed ? `${tajweedColor}15` : 'white',
@@ -85,7 +85,7 @@ function VerseView({ verse, activeWord, onWordClick }) {
             style={{ backgroundColor: '#FDF6E3', border: '1px solid #D4A017' }}
           >
             <div className="flex items-center gap-3">
-              <span style={{ fontFamily: 'Amiri, serif', fontSize: '28px', color: '#1B4D6B' }}>
+              <span style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize: '28px', color: '#1B4D6B' }}>
                 {activeWord.arabic}
               </span>
               <div>
@@ -189,7 +189,7 @@ export default function QuranPage() {
             <h2 className="font-bold text-white" style={{ fontFamily: 'Nunito, sans-serif' }}>
               Surah {surah.name}
             </h2>
-            <div style={{ fontFamily: 'Amiri, serif', color: '#D4A017', direction: 'rtl', fontSize: '20px' }}>
+            <div style={{ fontFamily:'IndoPak Nastaleeq,serif', color: '#D4A017', direction: 'rtl', fontSize: '20px' }}>
               سورة {surah.arabicName}
             </div>
           </div>
@@ -215,7 +215,7 @@ export default function QuranPage() {
 
         {/* Bismillah decoration */}
         <div className="text-center py-4 px-4" style={{ backgroundColor: '#FDF6E3' }}>
-          <div style={{ fontFamily: 'Amiri, serif', fontSize: '28px', color: '#D4A017', direction: 'rtl' }}>
+          <div style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize: '28px', color: '#D4A017', direction: 'rtl' }}>
             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
           </div>
         </div>
@@ -291,7 +291,7 @@ export default function QuranPage() {
                   <h3 className="font-bold text-lg" style={{ color: '#1B4D6B', fontFamily: 'Nunito, sans-serif' }}>
                     Surah {surah.name}
                   </h3>
-                  <span style={{ fontFamily: 'Amiri, serif', color: '#D4A017', fontSize: '18px' }}>
+                  <span style={{ fontFamily:'IndoPak Nastaleeq,serif', color: '#D4A017', fontSize: '18px' }}>
                     {surah.arabicName}
                   </span>
                 </div>

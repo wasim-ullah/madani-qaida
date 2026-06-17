@@ -27,7 +27,7 @@ export function PageHeader({ title, titleArabic, subtitle, emoji, gradient }) {
           {title}
         </h1>
         {titleArabic && (
-          <p className="text-xl mt-1" style={{ fontFamily: 'Amiri, serif', color: '#FFD54F', direction: 'rtl' }}>
+          <p className="text-xl mt-1" style={{ fontFamily:'IndoPak Nastaleeq,serif', color: '#FFD54F', direction: 'rtl' }}>
             {titleArabic}
           </p>
         )}

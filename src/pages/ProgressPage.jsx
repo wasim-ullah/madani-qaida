@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useProgress } from '../hooks/useProgress';
 import { QAIDA_LESSONS } from '../data/qaida';
 import { PageHeader } from '../components/ui/PageHeader';
+import { TeacherReviewPanel } from '../components/ui/TeacherMark';
 
 const BADGES = [
   { id:'first_lesson',   name:'First Step',        arabicName:'الخطوة الأولى',  emoji:'🌱', color:'#22C55E', condition:p=>p.completedLessons.length>=1,           tip:'Complete your first lesson' },
@@ -38,7 +39,7 @@ function BadgeCard({ badge, earned }) {
         style={{ color: earned ? badge.color : '#94A3B8', fontFamily:'Fredoka One,cursive' }}>
         {badge.name}
       </div>
-      <div className="text-xs mt-0.5" style={{ fontFamily:'Amiri,serif', color: earned ? badge.color : '#CBD5E1', direction:'rtl', opacity:0.9 }}>
+      <div className="text-xs mt-0.5" style={{ fontFamily:'IndoPak Nastaleeq,serif', color: earned ? badge.color : '#CBD5E1', direction:'rtl', opacity:0.9 }}>
         {badge.arabicName}
       </div>
       <div className="text-xs mt-2 opacity-70" style={{ color:'#64748B', fontFamily:'Nunito,sans-serif' }}>
@@ -172,6 +173,9 @@ export default function ProgressPage() {
             </p>
           </div>
         )}
+
+        {/* ── Teacher Review ────────────── */}
+        <TeacherReviewPanel />
 
         {/* ── Reset ─────────────────────── */}
         <button

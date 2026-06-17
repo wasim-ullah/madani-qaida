@@ -10,6 +10,7 @@ import { useProgress } from './hooks/useProgress'
 import { useAudio }    from './hooks/useAudio'
 import { useProfile }  from './hooks/useProfile'
 import { ProfileAvatar, ProfilePanel } from './components/ui/ProfilePanel'
+import { TeacherModeToggle } from './components/ui/TeacherMark'
 
 const NAV = [
   { id: 'qaida',    label: 'Qaida',    arabic: 'قاعده',  emoji: '📖', gradient: ['#1B4D6B','#2979A0'] },
@@ -132,7 +133,7 @@ export default function App() {
                 style={{ fontFamily: 'Fredoka One, cursive', fontSize: '20px' }}>
                 Madani Qaida
               </h1>
-              <p style={{ fontFamily: 'Amiri, serif', color: '#FFD54F', fontSize: '15px', direction: 'rtl' }}>
+              <p style={{ fontFamily:'IndoPak Nastaleeq,serif', color: '#FFD54F', fontSize: '15px', direction: 'rtl' }}>
                 مدنى قاعده
               </p>
             </div>
@@ -196,7 +197,7 @@ export default function App() {
                     style={{ fontFamily: 'Fredoka One, cursive' }}>
                     {item.label}
                   </div>
-                  <div className="text-xs opacity-60 text-white" style={{ fontFamily: 'Amiri, serif', direction: 'rtl', fontSize: '13px' }}>
+                  <div className="text-xs opacity-60 text-white" style={{ fontFamily:'IndoPak Nastaleeq,serif', direction: 'rtl', fontSize: '13px' }}>
                     {item.arabic}
                   </div>
                 </div>
@@ -212,6 +213,7 @@ export default function App() {
 
         {/* Footer */}
         <div className="px-5 py-4 border-t text-center" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+          <div className="mb-2 flex justify-center"><TeacherModeToggle /></div>
           <p className="text-xs opacity-40 text-white" style={{ fontFamily: 'Nunito, sans-serif' }}>
             Traditional Indo-Pak Madani Qaida Method
           </p>
@@ -236,7 +238,7 @@ export default function App() {
                 style={{ fontFamily: 'Fredoka One, cursive' }}>
                 {activeNav.label}
               </h1>
-              <p style={{ fontFamily: 'Amiri, serif', color: '#FFD54F', fontSize: '14px', direction: 'rtl', lineHeight: 1 }}>
+              <p style={{ fontFamily:'IndoPak Nastaleeq,serif', color: '#FFD54F', fontSize: '14px', direction: 'rtl', lineHeight: 1 }}>
                 {activeNav.arabic}
               </p>
             </div>
@@ -296,7 +298,7 @@ export default function App() {
                 <span className="text-xl relative z-10">{item.emoji}</span>
                 <span className="relative z-10 font-bold"
                   style={{
-                    fontSize: '9px', fontFamily: 'Fredoka One, cursive',
+                    fontSize: '8px', fontFamily: 'Fredoka One, cursive',
                     color: isActive ? '#FFD54F' : '#94A3B8',
                     letterSpacing: '0.3px',
                   }}>

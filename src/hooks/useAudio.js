@@ -5,26 +5,29 @@ let audioUnlocked = false;
 
 export function useAudio() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isReady, setIsReady] = useState(false);
+  const [isReady, setIsReady]     = useState(false);
   const timerRef = useRef(null);
 
-  // Check if speech synthesis is available and has Arabic voice
   useEffect(() => {
-    if (!('speechSynthesis' in window)) return;
+    if (!('speechSynthesis' in window)) {
+      console.warn('[useAudio] Web Speech API not supported in this browser.');
+      return;
+    }
 
     const checkVoices = () => {
       const voices = window.speechSynthesis.getVoices();
-      // Any voice available means we can at least try
-      setIsReady(voices.length > 0 || true);
+      const arVoice = voices.find(v => v.lang.startsWith('ar'));
+      if (!arVoice) {
+        console.warn('[useAudio] No Arabic voice found. Available voices:', voices.map(v => v.lang + ' — ' + v.name));
+      }
+      setIsReady(true);
     };
 
-    // Voices load asynchronously
     if (window.speechSynthesis.getVoices().length > 0) {
-      setIsReady(true);
+      checkVoices();
     } else {
       window.speechSynthesis.addEventListener('voiceschanged', checkVoices);
-      // Fallback: mark ready after 1s regardless
-      setTimeout(() => setIsReady(true), 1000);
+      setTimeout(() => { setIsReady(true); }, 1000);
     }
 
     return () => {
@@ -35,7 +38,6 @@ export function useAudio() {
   const unlockAudio = useCallback(() => {
     if (audioUnlocked) return;
     if (!('speechSynthesis' in window)) return;
-    // Speak empty string to unlock on user gesture
     const u = new SpeechSynthesisUtterance('');
     u.volume = 0;
     window.speechSynthesis.speak(u);
@@ -43,56 +45,54 @@ export function useAudio() {
   }, []);
 
   const speak = useCallback((text, options = {}) => {
-    if (!('speechSynthesis' in window) || !text) return;
+    if (!('speechSynthesis' in window)) {
+      console.warn('[useAudio] speechSynthesis unavailable — cannot play:', text);
+      return;
+    }
+    if (!text) return;
 
-    // Clear any pending timer
     if (timerRef.current) clearTimeout(timerRef.current);
-
-    // Cancel current speech
     window.speechSynthesis.cancel();
-
     setIsPlaying(true);
 
-    // Small delay helps cancel propagate on Safari/Chrome
     timerRef.current = setTimeout(() => {
       const utterance = new SpeechSynthesisUtterance(text);
-      const lang = options.lang ?? 'ar-SA';
-      utterance.lang    = lang;
-      utterance.rate    = options.rate  ?? 0.65;
-      utterance.pitch   = options.pitch ?? 1.05;
-      utterance.volume  = 1.0;
+      const lang      = options.lang ?? 'ar-SA';
+      utterance.lang   = lang;
+      utterance.rate   = options.rate  ?? 0.65;
+      utterance.pitch  = options.pitch ?? 1.05;
+      utterance.volume = 1.0;
 
       const voices = window.speechSynthesis.getVoices();
-      if (lang.startsWith('ur')) {
-        // Prefer Urdu voice for letter names (Indo-Pak style pronunciation)
-        const urduVoice =
-          voices.find(v => v.lang === 'ur-PK') ||
-          voices.find(v => v.lang.startsWith('ur'));
-        if (urduVoice) utterance.voice = urduVoice;
-      } else {
-        // Prefer Arabic voice for Quran/word reading
-        const arabicVoice =
+
+      if (lang.startsWith('ar')) {
+        const voice =
           voices.find(v => v.lang === 'ar-SA') ||
+          voices.find(v => v.lang === 'ar')    ||
           voices.find(v => v.lang.startsWith('ar'));
-        if (arabicVoice) utterance.voice = arabicVoice;
+        if (voice) utterance.voice = voice;
       }
 
       utterance.onend   = () => setIsPlaying(false);
-      utterance.onerror = () => setIsPlaying(false);
+      utterance.onerror = (e) => {
+        console.warn('[useAudio] Speech error:', e.error, 'text:', text);
+        setIsPlaying(false);
+      };
 
       window.speechSynthesis.speak(utterance);
       audioUnlocked = true;
 
-      // Watchdog: clear playing state after max 8s
+      // Watchdog — clears playing state if onend never fires
       setTimeout(() => setIsPlaying(false), 8000);
     }, 80);
   }, []);
 
-  // speakLetter: speaks the Urdu name (e.g. بے) so TTS says "Bay" not "Baa"
-  const speakLetter  = useCallback((l) => speak(l,    { lang: 'ur-PK', rate: 0.55 }), [speak]);
-  const speakWord    = useCallback((w) => speak(w,    { rate: 0.65 }), [speak]);
-  const speakVerse   = useCallback((v) => speak(v,    { rate: 0.58 }), [speak]);
-  const speakSlow    = useCallback((t) => speak(t,    { rate: 0.45 }), [speak]);
+  // speakLetter — speaks the raw Arabic character with ar-SA so the TTS
+  // pronounces the letter name in Arabic (ب → "baa", ت → "taa", etc.)
+  const speakLetter = useCallback((l) => speak(l, { lang: 'ar-SA', rate: 0.55 }), [speak]);
+  const speakWord   = useCallback((w) => speak(w, { rate: 0.60 }), [speak]);
+  const speakVerse  = useCallback((v) => speak(v, { rate: 0.55 }), [speak]);
+  const speakSlow   = useCallback((t) => speak(t, { rate: 0.40 }), [speak]);
 
   const stop = useCallback(() => {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -100,15 +100,8 @@ export function useAudio() {
   }, []);
 
   return {
-    speak,
-    speakLetter,
-    speakWord,
-    speakVerse,
-    speakSlow,
-    stop,
-    isPlaying,
-    isReady,
-    unlockAudio,
+    speak, speakLetter, speakWord, speakVerse, speakSlow, stop,
+    isPlaying, isReady, unlockAudio,
     isSupported: 'speechSynthesis' in window,
   };
 }

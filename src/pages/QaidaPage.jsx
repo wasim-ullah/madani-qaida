@@ -17,15 +17,11 @@ function HarakatBadge({ harakat }) {
   return (
     <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full"
       style={{ backgroundColor: harakat.bgColor, border: `2.5px solid ${harakat.color}` }}>
-      <span style={{ fontFamily:'Amiri,serif', fontSize:'24px', color: harakat.color, direction:'rtl', lineHeight:1.5 }}>
+      <span style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize:'24px', color: harakat.color, direction:'rtl', lineHeight:1.5 }}>
         ◌{harakat.arabic}
       </span>
       <span className="font-extrabold text-sm" style={{ color: harakat.color, fontFamily:'Fredoka One,cursive' }}>
         {harakat.name}
-      </span>
-      <span className="text-xs px-1.5 py-0.5 rounded-full font-bold text-white"
-        style={{ backgroundColor: harakat.color }}>
-        "{harakat.sound || '·'}"
       </span>
     </div>
   );
@@ -125,9 +121,9 @@ function LessonHarakat({ onComplete, isTanwin }) {
   const [activeLetter, setActiveLetter] = useState(practiceLetters[0]);
 
   const colorGuide = [
-    { label:'Zabar', sound:'a', color:'#E65100', bg:'#FFF3E0', emoji:'☀️', tip:'like "a" in "bat"' },
-    { label:'Zer',   sound:'i', color:'#1565C0', bg:'#E3F2FD', emoji:'💧', tip:'like "i" in "bit"' },
-    { label:'Pesh',  sound:'u', color:'#2E7D32', bg:'#E8F5E9', emoji:'🌿', tip:'like "u" in "but"' },
+    { label:'Zabar', sound:'a', color:'#E65100', bg:'#FFF3E0', emoji:'☀️', tip:'' },
+    { label:'Zer',   sound:'i', color:'#1565C0', bg:'#E3F2FD', emoji:'💧', tip:'' },
+    { label:'Pesh',  sound:'u', color:'#2E7D32', bg:'#E8F5E9', emoji:'🌿', tip:'' },
   ];
 
   return (
@@ -165,7 +161,7 @@ function LessonHarakat({ onComplete, isTanwin }) {
               onClick={() => speak(h.example)}
               whileTap={{ scale:0.92, y:4 }}
               whileHover={{ scale:1.04, y:-3 }}>
-              <div style={{ fontFamily:'Amiri,serif', fontSize:'52px', color:h.color, direction:'rtl', lineHeight:1.4 }}>
+              <div style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize:'52px', color:h.color, direction:'rtl', lineHeight:1.4 }}>
                 {h.example}
               </div>
               <div className="font-extrabold text-sm mt-1" style={{ color:h.color, fontFamily:'Fredoka One,cursive' }}>
@@ -187,7 +183,7 @@ function LessonHarakat({ onComplete, isTanwin }) {
             <button key={l.id} onClick={() => setActiveLetter(l)}
               className="px-3 py-2 rounded-xl text-2xl transition-all bubble-btn"
               style={{
-                fontFamily:'Amiri,serif',
+                fontFamily:'IndoPak Nastaleeq,serif',
                 backgroundColor: activeLetter.id===l.id ? '#1B4D6B' : 'white',
                 color: activeLetter.id===l.id ? '#FFD54F' : '#1B4D6B',
                 border: `2px solid ${activeLetter.id===l.id ? '#FFD54F' : '#E2E8F0'}`,
@@ -227,10 +223,10 @@ function LessonMadd({ onComplete }) {
           When you see ا و ي after their matching vowel — hold the sound for 2–4 beats
         </p>
         {/* Animated stretch */}
-        <motion.div className="mt-3 text-4xl" style={{ fontFamily:'Amiri,serif', color:'#1565C0' }}
+        <motion.div className="mt-3 text-4xl" style={{ fontFamily:'IndoPak Nastaleeq,serif', color:'#1565C0' }}
           animate={{ scaleX:[1,1.6,1] }}
           transition={{ duration:2, repeat:Infinity, repeatDelay:0.5 }}
-          style={{ transformOrigin:'right', fontFamily:'Amiri,serif', color:'#1565C0', fontSize:'40px' }}>
+          style={{ transformOrigin:'right', fontFamily:'IndoPak Nastaleeq,serif', color:'#1565C0', fontSize:'40px' }}>
           مَـــــال
         </motion.div>
         <p className="text-xs mt-2 opacity-70" style={{ color:'#1565C0', fontFamily:'Nunito,sans-serif' }}>
@@ -251,7 +247,7 @@ function LessonMadd({ onComplete }) {
             onClick={() => speak(m.example)}
             whileTap={{ scale:0.97, y:3 }}>
             {/* Animated example */}
-            <motion.div style={{ fontFamily:'Amiri,serif', fontSize:'44px', color:m.color, direction:'rtl', minWidth:'80px', textAlign:'center' }}
+            <motion.div style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize:'44px', color:m.color, direction:'rtl', minWidth:'80px', textAlign:'center' }}
               animate={{ scaleX:[1,1.3,1] }}
               transition={{ duration:2, repeat:Infinity, repeatDelay:i }}>
               {m.example}
@@ -259,7 +255,7 @@ function LessonMadd({ onComplete }) {
             <div className="flex-1">
               <div className="font-extrabold" style={{ color:m.color, fontFamily:'Fredoka One,cursive' }}>{m.label}</div>
               <div className="text-sm" style={{ fontFamily:'Nunito,sans-serif', color:m.color }}>
-                Letter <strong style={{ fontFamily:'Amiri,serif', fontSize:'18px' }}>{m.arabic}</strong> after {m.after}
+                Letter <strong style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize:'18px' }}>{m.arabic}</strong> after {m.after}
               </div>
               <div className="text-lg font-extrabold mt-1" style={{ color:m.color }}>"{m.sound}"</div>
             </div>
@@ -289,7 +285,7 @@ function LessonSukoon({ onComplete }) {
             STOP
           </text>
         </svg>
-        <motion.div style={{ fontFamily:'Amiri,serif', fontSize:'80px', color:'#7C3AED', direction:'rtl', lineHeight:1 }}
+        <motion.div style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize:'80px', color:'#7C3AED', direction:'rtl', lineHeight:1 }}
           animate={{ scale:[1,1.05,1] }} transition={{ duration:1.5, repeat:Infinity }}>
           بْ
         </motion.div>
@@ -316,13 +312,13 @@ function LessonSukoon({ onComplete }) {
             style={{ border:'2.5px solid #EDE9FE', boxShadow:'0 4px 0 #DDD6FE' }}
             onClick={() => speak(ex.word)}
             whileTap={{ scale:0.97 }}>
-            <span style={{ fontFamily:'Amiri,serif', fontSize:'48px', color:'#6D28D9', direction:'rtl' }}>
+            <span style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize:'48px', color:'#6D28D9', direction:'rtl' }}>
               {ex.word}
             </span>
             <div>
               <div className="font-extrabold" style={{ color:'#1B4D6B', fontFamily:'Fredoka One,cursive' }}>{ex.meaning}</div>
               <div className="text-sm" style={{ fontFamily:'Nunito,sans-serif', color:'#64748B' }}>
-                <span style={{ fontFamily:'Amiri,serif', color:'#7C3AED', fontSize:'18px' }}>{ex.highlight}</span>
+                <span style={{ fontFamily:'IndoPak Nastaleeq,serif', color:'#7C3AED', fontSize:'18px' }}>{ex.highlight}</span>
                 {' '}has Sukoon
               </div>
             </div>
@@ -345,11 +341,11 @@ function LessonShaddah({ onComplete }) {
         style={{ background:'linear-gradient(135deg,#FCE7F3,#FBCFE8)', border:'3px solid #DB2777' }}>
         {/* Merge animation */}
         <div className="flex items-center justify-center gap-3 text-5xl mb-3">
-          <span style={{ fontFamily:'Amiri,serif', color:'#DB2777' }}>ب</span>
+          <span style={{ fontFamily:'IndoPak Nastaleeq,serif', color:'#DB2777' }}>ب</span>
           <span className="text-2xl">+</span>
-          <span style={{ fontFamily:'Amiri,serif', color:'#DB2777' }}>ب</span>
+          <span style={{ fontFamily:'IndoPak Nastaleeq,serif', color:'#DB2777' }}>ب</span>
           <span className="text-2xl">=</span>
-          <motion.span style={{ fontFamily:'Amiri,serif', color:'#BE185D', fontSize:'56px' }}
+          <motion.span style={{ fontFamily:'IndoPak Nastaleeq,serif', color:'#BE185D', fontSize:'56px' }}
             animate={{ scale:[1,1.2,1] }} transition={{ duration:0.8, repeat:Infinity }}>
             بّ
           </motion.span>
@@ -366,7 +362,7 @@ function LessonShaddah({ onComplete }) {
         {['رَبّ','شَدّ','حَجّ','مَدّ','سَبّ','جَنّة'].map((w,i) => (
           <motion.button key={i}
             className="rounded-2xl p-4 text-center bubble-btn"
-            style={{ fontFamily:'Amiri,serif', fontSize:'36px', backgroundColor:'#FCE7F3',
+            style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize:'36px', backgroundColor:'#FCE7F3',
               border:'2.5px solid #DB2777', color:'#BE185D', boxShadow:'0 4px 0 #9D174D' }}
             onClick={() => speak(w)}
             whileTap={{ scale:0.9, y:3 }}>
@@ -397,7 +393,7 @@ function LessonQalqalah({ onComplete }) {
         <h3 className="text-xl font-extrabold" style={{ color:'#92400E', fontFamily:'Fredoka One,cursive' }}>
           Qalqalah = Echo Bounce!
         </h3>
-        <div style={{ fontFamily:'Amiri,serif', fontSize:'32px', color:'#1B4D6B', direction:'rtl' }}>
+        <div style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize:'32px', color:'#1B4D6B', direction:'rtl' }}>
           قُطْبُ جَدّ
         </div>
         <p className="text-xs mt-1" style={{ color:'#92400E', fontFamily:'Nunito,sans-serif' }}>
@@ -417,7 +413,7 @@ function LessonQalqalah({ onComplete }) {
             whileTap={{ scale:0.95 }}>
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
               style={{ background:'linear-gradient(135deg,#FEF3C7,#FDE68A)', border:'2px solid #D97706' }}>
-              <span style={{ fontFamily:'Amiri,serif', fontSize:'40px', color:'#D97706', direction:'rtl' }}>
+              <span style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize:'40px', color:'#D97706', direction:'rtl' }}>
                 {letter.arabic}ْ
               </span>
             </div>
@@ -452,7 +448,7 @@ function LessonWaqf({ onComplete }) {
           style={{ border:`2.5px solid ${w.color}30`, boxShadow:`0 4px 0 ${w.color}20` }}>
           {/* Sign badge */}
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 text-3xl font-extrabold"
-            style={{ backgroundColor: w.color+'20', color: w.color, fontFamily:'Amiri,serif', direction:'rtl' }}>
+            style={{ backgroundColor: w.color+'20', color: w.color, fontFamily:'IndoPak Nastaleeq,serif', direction:'rtl' }}>
             {w.sign}
           </div>
           <div className="flex-1">
@@ -495,7 +491,7 @@ function LessonForms({ onComplete }) {
           <button key={l.id} onClick={() => setSel(l)}
             className="rounded-xl px-3 py-2 transition-all bubble-btn"
             style={{
-              fontFamily:'Amiri,serif', fontSize:'26px',
+              fontFamily:'IndoPak Nastaleeq,serif', fontSize:'26px',
               backgroundColor: sel.id===l.id ? '#1B4D6B' : 'white',
               color: sel.id===l.id ? '#FFD54F' : '#1B4D6B',
               boxShadow: sel.id===l.id ? '0 4px 0 #0d2d40' : '0 3px 0 #CBD5E1',
@@ -513,7 +509,7 @@ function LessonForms({ onComplete }) {
             onClick={() => speak(char)}
             whileTap={{ scale:0.95, y:3 }}>
             <div className="text-xl mb-1">{fEmoji[form]}</div>
-            <div style={{ fontFamily:'Amiri,serif', fontSize:'48px', color:fColors[form], direction:'rtl' }}>
+            <div style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize:'48px', color:fColors[form], direction:'rtl' }}>
               {char}
             </div>
             <div className="font-extrabold text-sm capitalize mt-1" style={{ color:fColors[form], fontFamily:'Fredoka One,cursive' }}>
@@ -555,7 +551,7 @@ function LessonWords({ onComplete }) {
             onClick={() => { setSel(word); speak(word.arabic); }}
             whileTap={{ scale:0.95, y:3 }}>
             <div className="text-3xl mb-1">{word.icon}</div>
-            <div style={{ fontFamily:'Amiri,serif', fontSize:'32px', color: sel?.id===word.id ? '#FFD54F' : '#1B4D6B', direction:'rtl' }}>
+            <div style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize:'32px', color: sel?.id===word.id ? '#FFD54F' : '#1B4D6B', direction:'rtl' }}>
               {word.arabic}
             </div>
             <div className="text-xs font-extrabold mt-1"
@@ -578,7 +574,7 @@ function LessonWords({ onComplete }) {
               {sel.letters.map((l,i) => (
                 <motion.button key={i}
                   className="rounded-xl px-4 py-3 bg-white bubble-btn"
-                  style={{ fontFamily:'Amiri,serif', fontSize:'32px', color:'#1B4D6B', boxShadow:'0 4px 0 #B45309' }}
+                  style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize:'32px', color:'#1B4D6B', boxShadow:'0 4px 0 #B45309' }}
                   onClick={() => speakLetter(l)}
                   whileTap={{ scale:0.9 }}>
                   {l}
@@ -586,7 +582,7 @@ function LessonWords({ onComplete }) {
               ))}
               <motion.button
                 className="rounded-xl px-4 py-3 bubble-btn font-extrabold"
-                style={{ fontFamily:'Amiri,serif', fontSize:'28px', backgroundColor:'#D97706', color:'white', boxShadow:'0 4px 0 #92400E' }}
+                style={{ fontFamily:'IndoPak Nastaleeq,serif', fontSize:'28px', backgroundColor:'#D97706', color:'white', boxShadow:'0 4px 0 #92400E' }}
                 onClick={() => speak(sel.arabic)}
                 whileTap={{ scale:0.9 }}>
                 {sel.arabic} 🔊
