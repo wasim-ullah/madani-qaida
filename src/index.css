@@ -106,26 +106,31 @@ body {
 .bubble-btn:active { transform: translateY(2px);  box-shadow: 0 2px 0 rgba(0,0,0,0.18); }
 
 /* ── Web layout sidebar ─────────────  */
-@media (min-width: 768px) {
-  .app-shell {
-    display: flex;
-    height: 100svh;
-    overflow: hidden;
-  }
-  .sidebar { display: flex !important; }
-  .bottom-nav { display: none !important; }
-  .page-scroll { height: 100svh; overflow-y: auto; }
+
+/* Default (desktop) */
+.app-shell {
+  display: flex;
+  height: 100svh;
+  overflow: hidden;
 }
+.sidebar { display: flex; }
+.page-scroll { height: 100svh; overflow-y: auto; }
+
 @media (max-width: 767px) {
-  .app-shell { display: block; }
+  .app-shell { display: block; height: auto; overflow: visible; }
   .sidebar { display: none !important; }
   .bottom-nav { display: flex !important; }
-  /* 56px bottom nav + safe area */
-  .page-scroll { height: calc(100svh - 56px); overflow-y: auto; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  /* mobile top header ≈ 60px + 56px bottom nav */
+  .page-scroll {
+    height: calc(100svh - 60px - 56px - env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    padding-bottom: 4px;
+  }
 }
 
 /* ── Mobile bottom nav ──────────────  */
 .bottom-nav {
+  display: none;        /* hidden by default; media query shows on mobile */
   height: 56px;
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -133,5 +138,5 @@ body {
 /* Landscape phone: reduce nav height */
 @media (max-width: 767px) and (orientation: landscape) {
   .bottom-nav { height: 48px; }
-  .page-scroll { height: calc(100svh - 48px); }
+  .page-scroll { height: calc(100svh - 56px - 48px); }
 }

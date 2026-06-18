@@ -11,6 +11,7 @@ import { useAudio }    from './hooks/useAudio'
 import { useProfile }  from './hooks/useProfile'
 import { ProfileAvatar, ProfilePanel } from './components/ui/ProfilePanel'
 import { TeacherModeToggle } from './components/ui/TeacherMark'
+import { TeacherDrawingOverlay } from './components/ui/TeacherDrawing'
 
 const NAV = [
   { id: 'qaida',    label: 'Qaida',    arabic: 'قاعده',  emoji: '📖', gradient: ['#1B4D6B','#2979A0'] },
@@ -223,7 +224,8 @@ export default function App() {
       {/* ═══════════════════════════════
           MAIN CONTENT AREA
       ═══════════════════════════════ */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0" style={{ position: 'relative' }}>
+        <TeacherDrawingOverlay />
 
         {/* ── Mobile top bar ────────── */}
         <header className="flex md:hidden items-center justify-between px-4 py-3 shadow-lg shrink-0 relative overflow-hidden"
