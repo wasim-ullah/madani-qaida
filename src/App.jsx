@@ -116,7 +116,7 @@ export default function App() {
           DESKTOP SIDEBAR
       ═══════════════════════════════ */}
       <aside className="sidebar flex-col w-64 shrink-0 shadow-2xl"
-        style={{ background: 'linear-gradient(180deg,#0d2d40 0%,#1B4D6B 60%,#0d3349 100%)', position: 'relative', overflow: 'hidden' }}
+        style={{ background: 'linear-gradient(180deg,#0d2d40 0%,#1B4D6B 60%,#0d3349 100%)', position: 'relative', overflow: 'hidden', zIndex: 200 }}
       >
         {/* Decorative clouds */}
         <Cloud style={{ position:'absolute', top:'-10px', right:'-20px', width:'140px', opacity:0.06 }} />
@@ -229,7 +229,7 @@ export default function App() {
 
         {/* ── Mobile top bar ────────── */}
         <header className="flex md:hidden items-center justify-between px-4 py-3 shadow-lg shrink-0 relative overflow-hidden"
-          style={{ background: `linear-gradient(135deg,${activeNav.gradient[0]},${activeNav.gradient[1]})` }}>
+          style={{ background: `linear-gradient(135deg,${activeNav.gradient[0]},${activeNav.gradient[1]})`, zIndex: 200 }}>
           <Cloud style={{ position:'absolute', top:'-5px', right:'-10px', width:'100px', opacity:0.12 }} />
           <div className="flex items-center gap-2 relative z-10">
             <span className="text-3xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
@@ -277,8 +277,8 @@ export default function App() {
       {/* ═══════════════════════════════
           MOBILE BOTTOM NAV
       ═══════════════════════════════ */}
-      <nav className="bottom-nav fixed bottom-0 left-0 right-0 z-40 border-t"
-        style={{ background: 'linear-gradient(0deg,#0d2d40,#1B4D6B)', borderColor: 'rgba(255,213,79,0.3)' }}>
+      <nav className="bottom-nav fixed bottom-0 left-0 right-0 border-t"
+        style={{ background: 'linear-gradient(0deg,#0d2d40,#1B4D6B)', borderColor: 'rgba(255,213,79,0.3)', zIndex: 200 }}>
         <div className="flex">
           {NAV.map(item => {
             const isActive = activePage === item.id
