@@ -279,33 +279,63 @@ export default function App() {
       ═══════════════════════════════ */}
       <nav className="bottom-nav fixed bottom-0 left-0 right-0 border-t"
         style={{ background: 'linear-gradient(0deg,#0d2d40,#1B4D6B)', borderColor: 'rgba(255,213,79,0.3)', zIndex: 200 }}>
-        <div className="flex">
+        <div style={{ display: 'flex', height: '56px' }}>
           {NAV.map(item => {
             const isActive = activePage === item.id
             return (
               <button
                 key={item.id}
                 onClick={() => setActivePage(item.id)}
-                className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 relative transition-all"
-                style={{ minHeight: '56px' }}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: isActive ? 2 : 0,
+                  position: 'relative',
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  padding: 0,
+                  minWidth: 0,
+                }}
               >
                 {isActive && (
                   <motion.div
                     layoutId="mobileActiveTab"
-                    className="absolute inset-x-1 inset-y-1 rounded-2xl"
-                    style={{ background: `linear-gradient(135deg,${item.gradient[0]},${item.gradient[1]})` }}
+                    style={{
+                      position: 'absolute',
+                      inset: '4px 3px',
+                      borderRadius: 14,
+                      background: `linear-gradient(135deg,${item.gradient[0]},${item.gradient[1]})`,
+                    }}
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
                 )}
-                <span className="text-xl relative z-10">{item.emoji}</span>
-                <span className="relative z-10 font-bold"
-                  style={{
-                    fontSize: '8px', fontFamily: 'Fredoka One, cursive',
-                    color: isActive ? '#FFD54F' : '#94A3B8',
-                    letterSpacing: '0.3px',
-                  }}>
-                  {item.label}
+                <span style={{
+                  fontSize: isActive ? '22px' : '18px',
+                  lineHeight: 1,
+                  position: 'relative',
+                  zIndex: 1,
+                  transition: 'font-size 0.15s',
+                }}>
+                  {item.emoji}
                 </span>
+                {isActive && (
+                  <span style={{
+                    fontSize: '9px',
+                    fontFamily: 'Fredoka One, cursive',
+                    color: '#FFD54F',
+                    letterSpacing: '0.3px',
+                    position: 'relative',
+                    zIndex: 1,
+                    lineHeight: 1,
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {item.label}
+                  </span>
+                )}
               </button>
             )
           })}
