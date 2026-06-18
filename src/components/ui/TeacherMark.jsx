@@ -61,7 +61,7 @@ export function TeacherMarkBorder({ itemId, children, style = {}, className = ''
 /**
  * TeacherModeToggle — pill button for the header/sidebar.
  */
-export function TeacherModeToggle() {
+export function TeacherModeToggle({ compact = false }) {
   const { teacherMode, toggleTeacherMode } = useTeacherMarks();
 
   return (
@@ -69,20 +69,25 @@ export function TeacherModeToggle() {
       onClick={toggleTeacherMode}
       whileTap={{ scale: 0.95 }}
       style={{
-        display: 'flex', alignItems: 'center', gap: 6,
-        padding: '6px 12px', borderRadius: 20,
+        display: 'flex', alignItems: 'center', gap: compact ? 4 : 6,
+        padding: compact ? '5px 8px' : '6px 12px',
+        borderRadius: 20,
         background: teacherMode
           ? 'linear-gradient(135deg,#7C3AED,#8B5CF6)'
-          : 'rgba(255,255,255,0.15)',
-        border: '1.5px solid ' + (teacherMode ? '#A78BFA' : 'rgba(255,255,255,0.3)'),
+          : 'rgba(255,255,255,0.18)',
+        border: '1.5px solid ' + (teacherMode ? '#A78BFA' : 'rgba(255,255,255,0.35)'),
         color: 'white', cursor: 'pointer',
-        fontFamily: 'Fredoka One, cursive', fontSize: '12px',
+        fontFamily: 'Fredoka One, cursive',
+        fontSize: compact ? '11px' : '12px',
         boxShadow: teacherMode ? '0 3px 0 #6D28D9' : 'none',
         transition: 'all 0.2s',
+        whiteSpace: 'nowrap',
       }}
     >
-      <span>{teacherMode ? '🎓' : '👩‍🏫'}</span>
-      <span>{teacherMode ? 'Teacher ON' : 'Teacher'}</span>
+      <span style={{ fontSize: compact ? '14px' : '16px' }}>
+        {teacherMode ? '🎓' : '👩‍🏫'}
+      </span>
+      {!compact && <span>{teacherMode ? 'Teacher ON' : 'Teacher'}</span>}
     </motion.button>
   );
 }

@@ -246,14 +246,15 @@ export default function App() {
             </div>
           </div>
           <div className="flex items-center gap-2 relative z-10">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+            <TeacherModeToggle compact />
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full"
               style={{ backgroundColor: 'rgba(255,255,255,0.2)', border: '1.5px solid rgba(255,255,255,0.4)' }}>
-              <span className="text-lg">⭐</span>
-              <span className="font-extrabold text-lg" style={{ color: '#FFD54F', fontFamily: 'Fredoka One, cursive' }}>
+              <span style={{ fontSize: '16px' }}>⭐</span>
+              <span className="font-extrabold" style={{ color: '#FFD54F', fontFamily: 'Fredoka One, cursive', fontSize: '15px' }}>
                 {progress.totalStars}
               </span>
             </div>
-            <ProfileAvatar size={38} onClick={() => setShowProfile(true)} />
+            <ProfileAvatar size={34} onClick={() => setShowProfile(true)} />
           </div>
         </header>
 
@@ -279,7 +280,7 @@ export default function App() {
       ═══════════════════════════════ */}
       <nav className="bottom-nav fixed bottom-0 left-0 right-0 border-t"
         style={{ background: 'linear-gradient(0deg,#0d2d40,#1B4D6B)', borderColor: 'rgba(255,213,79,0.3)', zIndex: 200 }}>
-        <div style={{ display: 'flex', height: '56px' }}>
+        <div style={{ display: 'flex', height: '100%', alignItems: 'stretch' }}>
           {NAV.map(item => {
             const isActive = activePage === item.id
             return (
@@ -292,13 +293,14 @@ export default function App() {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: isActive ? 2 : 0,
+                  gap: 2,
                   position: 'relative',
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  padding: 0,
+                  padding: '4px 0',
                   minWidth: 0,
+                  overflow: 'hidden',
                 }}
               >
                 {isActive && (
@@ -306,36 +308,37 @@ export default function App() {
                     layoutId="mobileActiveTab"
                     style={{
                       position: 'absolute',
-                      inset: '4px 3px',
-                      borderRadius: 14,
+                      inset: '3px 2px',
+                      borderRadius: 12,
                       background: `linear-gradient(135deg,${item.gradient[0]},${item.gradient[1]})`,
                     }}
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
                 )}
                 <span style={{
-                  fontSize: isActive ? '22px' : '18px',
+                  fontSize: '18px',
                   lineHeight: 1,
                   position: 'relative',
                   zIndex: 1,
-                  transition: 'font-size 0.15s',
                 }}>
                   {item.emoji}
                 </span>
-                {isActive && (
-                  <span style={{
-                    fontSize: '9px',
-                    fontFamily: 'Fredoka One, cursive',
-                    color: '#FFD54F',
-                    letterSpacing: '0.3px',
-                    position: 'relative',
-                    zIndex: 1,
-                    lineHeight: 1,
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {item.label}
-                  </span>
-                )}
+                <span style={{
+                  fontSize: '9px',
+                  fontFamily: 'Fredoka One, cursive',
+                  color: isActive ? '#FFD54F' : '#94A3B8',
+                  position: 'relative',
+                  zIndex: 1,
+                  lineHeight: 1,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '100%',
+                  paddingLeft: 2,
+                  paddingRight: 2,
+                }}>
+                  {item.label}
+                </span>
               </button>
             )
           })}

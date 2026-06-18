@@ -4,8 +4,8 @@
     {
       "name": "madani-qaida",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "3737", "--host", "0.0.0.0"],
-      "port": 3737
+      "runtimeArgs": ["run", "dev", "--", "--port", "5173", "--host"],
+      "port": 5173
     }
   ]
 }
