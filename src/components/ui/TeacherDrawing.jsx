@@ -15,237 +15,246 @@ const COLORS = [
 
 const TOOLS = [
   { id: 'marker', icon: '✏️', label: 'Marker', width: 8  },
-  { id: 'bold',   icon: '🖊️', label: 'Bold',   width: 22 },
+  { id: 'bold',   icon: '🖊️', label: 'Bold',   width: 24 },
   { id: 'circle', icon: '⭕', label: 'Circle',  width: 6  },
-  { id: 'eraser', icon: '🧹', label: 'Eraser',  width: 32 },
+  { id: 'eraser', icon: '🧹', label: 'Eraser',  width: 36 },
 ];
 
 export function TeacherDrawingOverlay() {
   const { teacherMode } = useTeacherMarks();
+
   const canvasRef  = useRef(null);
-  const drawing    = useRef(false);   // use ref not state — avoids stale closure
-  const startPos   = useRef(null);
-  const history    = useRef([]);      // ImageData snapshots for undo
+  const isDrawing  = useRef(false);
+  const startPos   = useRef({ x: 0, y: 0 });
+  const snapshots  = useRef([]);   // undo history
 
-  const [color, setColor] = useState(COLORS[0].hex);
-  const [tool,  setTool]  = useState('marker');
-  const [histLen, setHistLen] = useState(0); // just for undo button re-render
+  const [color,   setColor]   = useState('#EF4444');
+  const [tool,    setTool]    = useState('marker');
+  const [canUndo, setCanUndo] = useState(false);
 
-  // ── Resize canvas to fill parent, preserve drawing ──────────────────────────
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const resize = () => {
-      const parent = canvas.parentElement;
-      if (!parent) return;
-      const { width, height } = parent.getBoundingClientRect();
-
-      // Snapshot existing pixels
-      const tmp = document.createElement('canvas');
-      tmp.width  = canvas.width;
-      tmp.height = canvas.height;
-      tmp.getContext('2d').drawImage(canvas, 0, 0);
-
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width  = width  * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width  = width  + 'px';
-      canvas.style.height = height + 'px';
-
-      const ctx = canvas.getContext('2d');
-      ctx.scale(dpr, dpr);
-      ctx.drawImage(tmp, 0, 0, width, height);
-    };
-
-    resize();
-    const ro = new ResizeObserver(resize);
-    ro.observe(canvas.parentElement);
-    return () => ro.disconnect();
-  }, []);
-
-  // ── Clear canvas when teacher mode turns OFF ────────────────────────────────
-  useEffect(() => {
-    if (!teacherMode) {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-      history.current = [];
-      setHistLen(0);
-    }
-  }, [teacherMode]);
-
-  // ── Helpers ──────────────────────────────────────────────────────────────────
-  const getPos = (e) => {
-    const canvas = canvasRef.current;
-    const rect   = canvas.getBoundingClientRect();
-    const src    = e.touches ? e.touches[0] : e;
-    return { x: src.clientX - rect.left, y: src.clientY - rect.top };
-  };
-
-  const saveSnapshot = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const snap = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
-    history.current = [...history.current.slice(-19), snap];
-    setHistLen(history.current.length);
-  };
-
-  const applyStrokeStyle = (ctx, currentTool, currentColor) => {
-    ctx.lineCap  = 'round';
-    ctx.lineJoin = 'round';
-    if (currentTool === 'eraser') {
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.strokeStyle = 'rgba(0,0,0,1)';
-      ctx.lineWidth   = TOOLS.find(t => t.id === 'eraser').width;
-    } else {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = currentColor;
-      ctx.lineWidth   = TOOLS.find(t => t.id === currentTool)?.width ?? 8;
-    }
-  };
-
-  // ── Pointer handlers (use refs for tool/color to avoid stale closures) ───────
+  // Mirror tool/color into refs so event handlers always see the latest value
   const toolRef  = useRef(tool);
   const colorRef = useRef(color);
   useEffect(() => { toolRef.current  = tool;  }, [tool]);
   useEffect(() => { colorRef.current = color; }, [color]);
 
-  const onPointerDown = useCallback((e) => {
+  // ── Size the canvas to match the viewport ──────────────────────────────────
+  useEffect(() => {
     if (!teacherMode) return;
-    // Ignore right-click / middle-click
-    if (e.button !== undefined && e.button !== 0) return;
-    e.preventDefault();
-    e.currentTarget.setPointerCapture(e.pointerId); // keep events even if pointer leaves canvas
-
-    saveSnapshot();
-    drawing.current = true;
-    startPos.current = getPos(e);
 
     const canvas = canvasRef.current;
-    const ctx    = canvas.getContext('2d');
+    if (!canvas) return;
 
-    if (toolRef.current !== 'circle') {
-      applyStrokeStyle(ctx, toolRef.current, colorRef.current);
-      ctx.beginPath();
-      ctx.moveTo(startPos.current.x, startPos.current.y);
+    const fit = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const w   = window.innerWidth;
+      const h   = window.innerHeight;
+
+      // Preserve existing drawing across resize
+      const tmp = document.createElement('canvas');
+      tmp.width  = canvas.width;
+      tmp.height = canvas.height;
+      tmp.getContext('2d').drawImage(canvas, 0, 0);
+
+      canvas.width  = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width  = w + 'px';
+      canvas.style.height = h + 'px';
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.drawImage(tmp, 0, 0, w, h);
+    };
+
+    fit();
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, [teacherMode]);
+
+  // ── Clear canvas when teacher mode turns OFF ───────────────────────────────
+  useEffect(() => {
+    if (!teacherMode) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+      }
+      snapshots.current = [];
+      setCanUndo(false);
     }
   }, [teacherMode]);
 
-  const onPointerMove = useCallback((e) => {
-    if (!drawing.current) return;
-    e.preventDefault();
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  const getXY = (e) => {
+    if (e.touches && e.touches.length > 0) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    return { x: e.clientX, y: e.clientY };
+  };
 
+  const snapshot = () => {
     const canvas = canvasRef.current;
-    const ctx    = canvas.getContext('2d');
-    const pos    = getPos(e);
+    if (!canvas) return;
+    const data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+    snapshots.current = [...snapshots.current.slice(-19), data];
+    setCanUndo(true);
+  };
 
-    if (toolRef.current === 'circle') {
-      // Restore last snapshot for live preview
-      if (history.current.length > 0) {
-        ctx.putImageData(history.current[history.current.length - 1], 0, 0);
-      } else {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
-      const sx = startPos.current.x, sy = startPos.current.y;
-      const rx = Math.max(Math.abs(pos.x - sx) / 2, 2);
-      const ry = Math.max(Math.abs(pos.y - sy) / 2, 2);
-      const cx = (sx + pos.x) / 2;
-      const cy = (sy + pos.y) / 2;
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = colorRef.current;
-      ctx.lineWidth   = TOOLS.find(t => t.id === 'circle').width;
-      ctx.lineCap     = 'round';
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
-      ctx.stroke();
+  const strokeStyle = (ctx) => {
+    ctx.lineCap  = 'round';
+    ctx.lineJoin = 'round';
+    if (toolRef.current === 'eraser') {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.strokeStyle = 'rgba(0,0,0,1)';
+      ctx.lineWidth   = TOOLS.find(t => t.id === 'eraser').width;
     } else {
-      applyStrokeStyle(ctx, toolRef.current, colorRef.current);
-      ctx.lineTo(pos.x, pos.y);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(pos.x, pos.y);
-    }
-  }, []);
-
-  const onPointerUp = useCallback((e) => {
-    if (!drawing.current) return;
-    e.preventDefault();
-    drawing.current = false;
-
-    const canvas = canvasRef.current;
-    const ctx    = canvas.getContext('2d');
-
-    // For circle: commit the final ellipse
-    if (toolRef.current === 'circle' && startPos.current) {
-      const pos = getPos(e);
-      if (history.current.length > 0) {
-        ctx.putImageData(history.current[history.current.length - 1], 0, 0);
-      }
-      const sx = startPos.current.x, sy = startPos.current.y;
-      const rx = Math.max(Math.abs(pos.x - sx) / 2, 2);
-      const ry = Math.max(Math.abs(pos.y - sy) / 2, 2);
-      const cx = (sx + pos.x) / 2;
-      const cy = (sy + pos.y) / 2;
       ctx.globalCompositeOperation = 'source-over';
       ctx.strokeStyle = colorRef.current;
-      ctx.lineWidth   = TOOLS.find(t => t.id === 'circle').width;
-      ctx.lineCap     = 'round';
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
-      ctx.stroke();
+      ctx.lineWidth   = TOOLS.find(t => t.id === toolRef.current)?.width ?? 8;
     }
+  };
 
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.beginPath();
-  }, []);
-
-  const undo = useCallback(() => {
+  // ── Pointer / touch handlers attached directly to canvas via useEffect ──────
+  // (Using addEventListener directly avoids React synthetic event pooling issues
+  //  and ensures we always get the freshest handler without stale closures)
+  useEffect(() => {
+    if (!teacherMode) return;
     const canvas = canvasRef.current;
-    if (!canvas || history.current.length === 0) return;
-    const last = history.current[history.current.length - 1];
-    canvas.getContext('2d').putImageData(last, 0, 0);
-    history.current = history.current.slice(0, -1);
-    setHistLen(history.current.length);
-  }, []);
+    if (!canvas) return;
 
-  const clearAll = useCallback(() => {
+    const onDown = (e) => {
+      // Ignore toolbar touches (they stopPropagation, but just in case)
+      if (e.target !== canvas) return;
+      e.preventDefault();
+
+      snapshot();
+      isDrawing.current = true;
+      const pos = getXY(e);
+      startPos.current = pos;
+
+      if (toolRef.current !== 'circle') {
+        const ctx = canvas.getContext('2d');
+        strokeStyle(ctx);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      }
+    };
+
+    const onMove = (e) => {
+      if (!isDrawing.current) return;
+      e.preventDefault();
+      const canvas = canvasRef.current;
+      const ctx    = canvas.getContext('2d');
+      const pos    = getXY(e);
+
+      if (toolRef.current === 'circle') {
+        // Restore last snapshot to show live ellipse preview
+        const snaps = snapshots.current;
+        if (snaps.length > 0) {
+          ctx.putImageData(snaps[snaps.length - 1], 0, 0);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        const sx = startPos.current.x, sy = startPos.current.y;
+        const rx = Math.max(Math.abs(pos.x - sx) / 2, 2);
+        const ry = Math.max(Math.abs(pos.y - sy) / 2, 2);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = colorRef.current;
+        ctx.lineWidth   = 6;
+        ctx.lineCap     = 'round';
+        ctx.beginPath();
+        ctx.ellipse((sx + pos.x) / 2, (sy + pos.y) / 2, rx, ry, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        strokeStyle(ctx);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      }
+    };
+
+    const onUp = (e) => {
+      if (!isDrawing.current) return;
+      isDrawing.current = false;
+
+      if (toolRef.current === 'circle') {
+        // Commit final ellipse
+        const canvas = canvasRef.current;
+        const ctx    = canvas.getContext('2d');
+        const pos    = getXY(e.changedTouches ? { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY } : e);
+        const snaps  = snapshots.current;
+        if (snaps.length > 0) ctx.putImageData(snaps[snaps.length - 1], 0, 0);
+        const sx = startPos.current.x, sy = startPos.current.y;
+        const rx = Math.max(Math.abs(pos.x - sx) / 2, 2);
+        const ry = Math.max(Math.abs(pos.y - sy) / 2, 2);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = colorRef.current;
+        ctx.lineWidth   = 6;
+        ctx.lineCap     = 'round';
+        ctx.beginPath();
+        ctx.ellipse((sx + pos.x) / 2, (sy + pos.y) / 2, rx, ry, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      const ctx = canvasRef.current.getContext('2d');
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.beginPath();
+    };
+
+    // Use both pointer and touch events for maximum compatibility
+    canvas.addEventListener('pointerdown',  onDown,  { passive: false });
+    canvas.addEventListener('pointermove',  onMove,  { passive: false });
+    canvas.addEventListener('pointerup',    onUp,    { passive: false });
+    canvas.addEventListener('pointercancel',onUp,    { passive: false });
+
+    return () => {
+      canvas.removeEventListener('pointerdown',   onDown);
+      canvas.removeEventListener('pointermove',   onMove);
+      canvas.removeEventListener('pointerup',     onUp);
+      canvas.removeEventListener('pointercancel', onUp);
+    };
+  }, [teacherMode]); // re-attach only when mode changes
+
+  const undo = () => {
+    const canvas = canvasRef.current;
+    if (!canvas || snapshots.current.length === 0) return;
+    const last = snapshots.current[snapshots.current.length - 1];
+    canvas.getContext('2d').putImageData(last, 0, 0);
+    snapshots.current = snapshots.current.slice(0, -1);
+    setCanUndo(snapshots.current.length > 0);
+  };
+
+  const clearAll = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-    history.current = [];
-    setHistLen(0);
-  }, []);
+    snapshots.current = [];
+    setCanUndo(false);
+  };
 
   if (!teacherMode) return null;
 
   return (
     <>
-      {/* Drawing canvas — sits over page content */}
+      {/* Full-viewport transparent canvas — sits above everything except toolbar */}
       <canvas
         ref={canvasRef}
         style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 30,
+          position: 'fixed',
+          top: 0, left: 0,
+          zIndex: 100,
           cursor: tool === 'eraser' ? 'cell' : 'crosshair',
           touchAction: 'none',
+          // Toolbar needs pointer events — let them through via zIndex (toolbar is 9999)
           pointerEvents: 'auto',
         }}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
       />
 
-      {/* ── Floating toolbar ── */}
-      <motion.div
-        initial={{ y: 80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 80, opacity: 0 }}
+      {/* ── Floating toolbar — always above canvas ── */}
+      <div
         style={{
           position: 'fixed',
-          bottom: 'calc(56px + env(safe-area-inset-bottom, 0px) + 10px)',
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 70px)',
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 9999,
@@ -257,105 +266,106 @@ export function TeacherDrawingOverlay() {
         }}
       >
         {/* Tools row */}
-        <div style={{
-          display: 'flex', gap: 5,
-          background: 'rgba(10,20,40,0.95)',
-          backdropFilter: 'blur(16px)',
-          borderRadius: 24,
-          padding: '6px 10px',
-          border: '1.5px solid rgba(255,255,255,0.18)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-        }}>
+        <div
+          onPointerDown={(e) => e.stopPropagation()}
+          style={{
+            display: 'flex', gap: 5,
+            background: 'rgba(8,18,36,0.96)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: 24,
+            padding: '6px 10px',
+            border: '1.5px solid rgba(255,255,255,0.2)',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+          }}>
           {TOOLS.map(t => (
-            <motion.button key={t.id}
+            <button
+              key={t.id}
               onPointerDown={(e) => { e.stopPropagation(); setTool(t.id); }}
-              whileTap={{ scale: 0.85 }}
               style={{
-                width: 42, height: 42, borderRadius: 12,
-                background: tool === t.id
-                  ? `linear-gradient(135deg, ${color}, ${color}cc)`
-                  : 'rgba(255,255,255,0.1)',
-                border: tool === t.id ? `2px solid ${color}` : '2px solid rgba(255,255,255,0.15)',
-                fontSize: '18px', cursor: 'pointer',
+                width: 44, height: 44, borderRadius: 12,
+                background: tool === t.id ? color : 'rgba(255,255,255,0.1)',
+                border: `2px solid ${tool === t.id ? color : 'rgba(255,255,255,0.15)'}`,
+                fontSize: '20px', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: tool === t.id ? `0 3px 10px ${color}60` : 'none',
+                boxShadow: tool === t.id ? `0 3px 12px ${color}70` : 'none',
                 transition: 'all 0.15s',
+                outline: 'none',
               }}
               title={t.label}
             >
               {t.icon}
-            </motion.button>
+            </button>
           ))}
 
           <div style={{ width: 1, background: 'rgba(255,255,255,0.2)', margin: '6px 3px' }} />
 
-          {/* Undo */}
-          <motion.button
+          <button
             onPointerDown={(e) => { e.stopPropagation(); undo(); }}
-            whileTap={{ scale: 0.85 }}
             style={{
-              width: 42, height: 42, borderRadius: 12,
-              background: histLen > 0 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
-              border: '2px solid transparent', fontSize: '18px', cursor: 'pointer',
+              width: 44, height: 44, borderRadius: 12,
+              background: canUndo ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+              border: '2px solid transparent',
+              fontSize: '20px', cursor: canUndo ? 'pointer' : 'default',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              opacity: histLen > 0 ? 1 : 0.3,
+              opacity: canUndo ? 1 : 0.3,
+              outline: 'none',
             }}
-            title="Undo">
-            ↩️
-          </motion.button>
+            title="Undo"
+          >↩️</button>
 
-          {/* Clear */}
-          <motion.button
+          <button
             onPointerDown={(e) => { e.stopPropagation(); clearAll(); }}
-            whileTap={{ scale: 0.85 }}
             style={{
-              width: 42, height: 42, borderRadius: 12,
+              width: 44, height: 44, borderRadius: 12,
               background: 'rgba(239,68,68,0.2)',
               border: '2px solid rgba(239,68,68,0.5)',
-              fontSize: '18px', cursor: 'pointer',
+              fontSize: '20px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
+              outline: 'none',
             }}
-            title="Clear all">
-            🗑️
-          </motion.button>
+            title="Clear all"
+          >🗑️</button>
         </div>
 
         {/* Color swatches */}
-        <div style={{
-          display: 'flex', gap: 5,
-          background: 'rgba(10,20,40,0.95)',
-          backdropFilter: 'blur(16px)',
-          borderRadius: 24,
-          padding: '7px 12px',
-          border: '1.5px solid rgba(255,255,255,0.18)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-        }}>
+        <div
+          onPointerDown={(e) => e.stopPropagation()}
+          style={{
+            display: 'flex', gap: 6,
+            background: 'rgba(8,18,36,0.96)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: 24,
+            padding: '8px 12px',
+            border: '1.5px solid rgba(255,255,255,0.2)',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+          }}>
           {COLORS.map(c => (
-            <motion.button key={c.hex}
+            <button
+              key={c.hex}
               onPointerDown={(e) => { e.stopPropagation(); setColor(c.hex); }}
-              whileTap={{ scale: 0.8 }}
               style={{
-                width: 28, height: 28, borderRadius: '50%',
+                width: 30, height: 30, borderRadius: '50%',
                 background: c.hex,
                 border: color === c.hex ? '3px solid white' : '2px solid rgba(255,255,255,0.25)',
                 cursor: 'pointer',
                 boxShadow: color === c.hex ? `0 0 0 2px ${c.hex}, 0 0 14px ${c.hex}90` : 'none',
                 transition: 'all 0.12s',
+                outline: 'none',
               }}
               title={c.name}
             />
           ))}
         </div>
 
-        {/* Label */}
         <div style={{
-          fontSize: '10px', color: 'rgba(255,255,255,0.55)',
+          fontSize: '10px', color: 'rgba(255,255,255,0.6)',
           fontFamily: 'Fredoka One, cursive', letterSpacing: 1,
           textTransform: 'uppercase',
+          textShadow: '0 1px 4px rgba(0,0,0,0.8)',
         }}>
           🎓 Teacher Drawing Mode
         </div>
-      </motion.div>
+      </div>
     </>
   );
 }
