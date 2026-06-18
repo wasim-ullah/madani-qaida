@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useTeacherMarks } from '../../hooks/useTeacherMarks';
 
 const COLORS = [
@@ -14,22 +14,24 @@ const COLORS = [
 ];
 
 const TOOLS = [
-  { id: 'marker', icon: '✏️', label: 'Marker', width: 10 },
+  { id: 'marker', icon: '✏️', label: 'Marker', width: 8  },
   { id: 'bold',   icon: '🖊️', label: 'Bold',   width: 22 },
-  { id: 'circle', icon: '⭕', label: 'Circle',  width: 10 },
-  { id: 'eraser', icon: '🧹', label: 'Eraser',  width: 28 },
+  { id: 'circle', icon: '⭕', label: 'Circle',  width: 6  },
+  { id: 'eraser', icon: '🧹', label: 'Eraser',  width: 32 },
 ];
 
 export function TeacherDrawingOverlay() {
   const { teacherMode } = useTeacherMarks();
-  const canvasRef   = useRef(null);
-  const [drawing, setDrawing]   = useState(false);
-  const [color, setColor]       = useState(COLORS[0].hex);
-  const [tool, setTool]         = useState('marker');
-  const [history, setHistory]   = useState([]);  // array of ImageData snapshots
-  const startPos = useRef(null);
+  const canvasRef  = useRef(null);
+  const drawing    = useRef(false);   // use ref not state — avoids stale closure
+  const startPos   = useRef(null);
+  const history    = useRef([]);      // ImageData snapshots for undo
 
-  // Resize canvas to fill its parent on mount and resize
+  const [color, setColor] = useState(COLORS[0].hex);
+  const [tool,  setTool]  = useState('marker');
+  const [histLen, setHistLen] = useState(0); // just for undo button re-render
+
+  // ── Resize canvas to fill parent, preserve drawing ──────────────────────────
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -38,19 +40,22 @@ export function TeacherDrawingOverlay() {
       const parent = canvas.parentElement;
       if (!parent) return;
       const { width, height } = parent.getBoundingClientRect();
-      // Preserve existing drawing during resize
+
+      // Snapshot existing pixels
       const tmp = document.createElement('canvas');
       tmp.width  = canvas.width;
       tmp.height = canvas.height;
       tmp.getContext('2d').drawImage(canvas, 0, 0);
 
-      canvas.width  = width  * window.devicePixelRatio;
-      canvas.height = height * window.devicePixelRatio;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width  = width  * dpr;
+      canvas.height = height * dpr;
       canvas.style.width  = width  + 'px';
       canvas.style.height = height + 'px';
+
       const ctx = canvas.getContext('2d');
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      ctx.drawImage(tmp, 0, 0);
+      ctx.scale(dpr, dpr);
+      ctx.drawImage(tmp, 0, 0, width, height);
     };
 
     resize();
@@ -59,129 +64,164 @@ export function TeacherDrawingOverlay() {
     return () => ro.disconnect();
   }, []);
 
-  const getPos = (e, canvas) => {
-    const rect = canvas.getBoundingClientRect();
-    const src  = e.touches ? e.touches[0] : e;
-    return {
-      x: (src.clientX - rect.left),
-      y: (src.clientY - rect.top),
-    };
+  // ── Clear canvas when teacher mode turns OFF ────────────────────────────────
+  useEffect(() => {
+    if (!teacherMode) {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+      history.current = [];
+      setHistLen(0);
+    }
+  }, [teacherMode]);
+
+  // ── Helpers ──────────────────────────────────────────────────────────────────
+  const getPos = (e) => {
+    const canvas = canvasRef.current;
+    const rect   = canvas.getBoundingClientRect();
+    const src    = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - rect.left, y: src.clientY - rect.top };
   };
 
-  const saveSnapshot = useCallback(() => {
+  const saveSnapshot = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    setHistory(h => [...h.slice(-19), ctx.getImageData(0, 0, canvas.width, canvas.height)]);
-  }, []);
+    const snap = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+    history.current = [...history.current.slice(-19), snap];
+    setHistLen(history.current.length);
+  };
 
-  const startDraw = useCallback((e) => {
-    if (!teacherMode) return;
-    e.preventDefault();
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    saveSnapshot();
-    const pos = getPos(e, canvas);
-    startPos.current = pos;
-    setDrawing(true);
-
-    const ctx = canvas.getContext('2d');
-    ctx.lineCap    = 'round';
-    ctx.lineJoin   = 'round';
-
-    if (tool === 'eraser') {
+  const applyStrokeStyle = (ctx, currentTool, currentColor) => {
+    ctx.lineCap  = 'round';
+    ctx.lineJoin = 'round';
+    if (currentTool === 'eraser') {
       ctx.globalCompositeOperation = 'destination-out';
       ctx.strokeStyle = 'rgba(0,0,0,1)';
       ctx.lineWidth   = TOOLS.find(t => t.id === 'eraser').width;
-    } else if (tool === 'circle') {
-      // Circle is drawn on pointerup, not here
     } else {
       ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = color;
-      ctx.lineWidth   = TOOLS.find(t => t.id === tool)?.width ?? 10;
-      ctx.beginPath();
-      ctx.moveTo(pos.x, pos.y);
+      ctx.strokeStyle = currentColor;
+      ctx.lineWidth   = TOOLS.find(t => t.id === currentTool)?.width ?? 8;
     }
-  }, [teacherMode, tool, color, saveSnapshot]);
+  };
 
-  const draw = useCallback((e) => {
-    if (!drawing || !teacherMode) return;
+  // ── Pointer handlers (use refs for tool/color to avoid stale closures) ───────
+  const toolRef  = useRef(tool);
+  const colorRef = useRef(color);
+  useEffect(() => { toolRef.current  = tool;  }, [tool]);
+  useEffect(() => { colorRef.current = color; }, [color]);
+
+  const onPointerDown = useCallback((e) => {
+    if (!teacherMode) return;
+    // Ignore right-click / middle-click
+    if (e.button !== undefined && e.button !== 0) return;
     e.preventDefault();
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const pos = getPos(e, canvas);
+    e.currentTarget.setPointerCapture(e.pointerId); // keep events even if pointer leaves canvas
 
-    if (tool === 'circle') {
-      // Show preview — restore last snapshot then draw preview circle
-      if (history.length > 0) {
-        ctx.putImageData(history[history.length - 1], 0, 0);
+    saveSnapshot();
+    drawing.current = true;
+    startPos.current = getPos(e);
+
+    const canvas = canvasRef.current;
+    const ctx    = canvas.getContext('2d');
+
+    if (toolRef.current !== 'circle') {
+      applyStrokeStyle(ctx, toolRef.current, colorRef.current);
+      ctx.beginPath();
+      ctx.moveTo(startPos.current.x, startPos.current.y);
+    }
+  }, [teacherMode]);
+
+  const onPointerMove = useCallback((e) => {
+    if (!drawing.current) return;
+    e.preventDefault();
+
+    const canvas = canvasRef.current;
+    const ctx    = canvas.getContext('2d');
+    const pos    = getPos(e);
+
+    if (toolRef.current === 'circle') {
+      // Restore last snapshot for live preview
+      if (history.current.length > 0) {
+        ctx.putImageData(history.current[history.current.length - 1], 0, 0);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
       const sx = startPos.current.x, sy = startPos.current.y;
-      const rx = Math.abs(pos.x - sx) / 2;
-      const ry = Math.abs(pos.y - sy) / 2;
+      const rx = Math.max(Math.abs(pos.x - sx) / 2, 2);
+      const ry = Math.max(Math.abs(pos.y - sy) / 2, 2);
       const cx = (sx + pos.x) / 2;
       const cy = (sy + pos.y) / 2;
       ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = color;
-      ctx.lineWidth   = 8;
+      ctx.strokeStyle = colorRef.current;
+      ctx.lineWidth   = TOOLS.find(t => t.id === 'circle').width;
       ctx.lineCap     = 'round';
       ctx.beginPath();
-      ctx.ellipse(cx, cy, Math.max(rx, 4), Math.max(ry, 4), 0, 0, 2 * Math.PI);
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
       ctx.stroke();
-      return;
-    }
-
-    if (tool === 'eraser') {
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.lineWidth = TOOLS.find(t => t.id === 'eraser').width;
     } else {
+      applyStrokeStyle(ctx, toolRef.current, colorRef.current);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+  }, []);
+
+  const onPointerUp = useCallback((e) => {
+    if (!drawing.current) return;
+    e.preventDefault();
+    drawing.current = false;
+
+    const canvas = canvasRef.current;
+    const ctx    = canvas.getContext('2d');
+
+    // For circle: commit the final ellipse
+    if (toolRef.current === 'circle' && startPos.current) {
+      const pos = getPos(e);
+      if (history.current.length > 0) {
+        ctx.putImageData(history.current[history.current.length - 1], 0, 0);
+      }
+      const sx = startPos.current.x, sy = startPos.current.y;
+      const rx = Math.max(Math.abs(pos.x - sx) / 2, 2);
+      const ry = Math.max(Math.abs(pos.y - sy) / 2, 2);
+      const cx = (sx + pos.x) / 2;
+      const cy = (sy + pos.y) / 2;
       ctx.globalCompositeOperation = 'source-over';
-      ctx.strokeStyle = color;
-      ctx.lineWidth   = TOOLS.find(t => t.id === tool)?.width ?? 10;
+      ctx.strokeStyle = colorRef.current;
+      ctx.lineWidth   = TOOLS.find(t => t.id === 'circle').width;
+      ctx.lineCap     = 'round';
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+      ctx.stroke();
     }
 
-    ctx.lineCap  = 'round';
-    ctx.lineJoin = 'round';
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-  }, [drawing, teacherMode, tool, color, history]);
-
-  const endDraw = useCallback((e) => {
-    if (!drawing) return;
-    e.preventDefault();
-    setDrawing(false);
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
     ctx.globalCompositeOperation = 'source-over';
     ctx.beginPath();
-  }, [drawing]);
+  }, []);
 
   const undo = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas || history.length === 0) return;
-    const ctx = canvas.getContext('2d');
-    const last = history[history.length - 1];
-    ctx.putImageData(last, 0, 0);
-    setHistory(h => h.slice(0, -1));
-  }, [history]);
+    if (!canvas || history.current.length === 0) return;
+    const last = history.current[history.current.length - 1];
+    canvas.getContext('2d').putImageData(last, 0, 0);
+    history.current = history.current.slice(0, -1);
+    setHistLen(history.current.length);
+  }, []);
 
   const clearAll = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    setHistory([]);
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    history.current = [];
+    setHistLen(0);
   }, []);
 
   if (!teacherMode) return null;
 
   return (
     <>
-      {/* Drawing canvas — sits over content, below toolbar */}
+      {/* Drawing canvas — sits over page content */}
       <canvas
         ref={canvasRef}
         style={{
@@ -190,12 +230,12 @@ export function TeacherDrawingOverlay() {
           zIndex: 30,
           cursor: tool === 'eraser' ? 'cell' : 'crosshair',
           touchAction: 'none',
-          pointerEvents: teacherMode ? 'auto' : 'none',
+          pointerEvents: 'auto',
         }}
-        onPointerDown={startDraw}
-        onPointerMove={draw}
-        onPointerUp={endDraw}
-        onPointerLeave={endDraw}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
       />
 
       {/* ── Floating toolbar ── */}
@@ -205,38 +245,40 @@ export function TeacherDrawingOverlay() {
         exit={{ y: 80, opacity: 0 }}
         style={{
           position: 'fixed',
-          bottom: 'calc(56px + env(safe-area-inset-bottom, 0px) + 8px)',
+          bottom: 'calc(56px + env(safe-area-inset-bottom, 0px) + 10px)',
           left: '50%',
           transform: 'translateX(-50%)',
-          zIndex: 50,
+          zIndex: 9999,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 8,
+          gap: 6,
           pointerEvents: 'auto',
         }}
       >
         {/* Tools row */}
         <div style={{
-          display: 'flex',
-          gap: 6,
-          background: 'rgba(15,25,45,0.92)',
-          backdropFilter: 'blur(12px)',
+          display: 'flex', gap: 5,
+          background: 'rgba(10,20,40,0.95)',
+          backdropFilter: 'blur(16px)',
           borderRadius: 24,
           padding: '6px 10px',
-          border: '1.5px solid rgba(255,255,255,0.15)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+          border: '1.5px solid rgba(255,255,255,0.18)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
         }}>
           {TOOLS.map(t => (
             <motion.button key={t.id}
-              onClick={() => setTool(t.id)}
-              whileTap={{ scale: 0.88 }}
+              onPointerDown={(e) => { e.stopPropagation(); setTool(t.id); }}
+              whileTap={{ scale: 0.85 }}
               style={{
-                width: 40, height: 40, borderRadius: 12,
-                background: tool === t.id ? color : 'rgba(255,255,255,0.1)',
-                border: tool === t.id ? `2px solid ${color}` : '2px solid transparent',
+                width: 42, height: 42, borderRadius: 12,
+                background: tool === t.id
+                  ? `linear-gradient(135deg, ${color}, ${color}cc)`
+                  : 'rgba(255,255,255,0.1)',
+                border: tool === t.id ? `2px solid ${color}` : '2px solid rgba(255,255,255,0.15)',
                 fontSize: '18px', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: tool === t.id ? `0 3px 10px ${color}60` : 'none',
                 transition: 'all 0.15s',
               }}
               title={t.label}
@@ -245,28 +287,31 @@ export function TeacherDrawingOverlay() {
             </motion.button>
           ))}
 
-          {/* Divider */}
-          <div style={{ width: 1, background: 'rgba(255,255,255,0.2)', margin: '4px 2px' }} />
+          <div style={{ width: 1, background: 'rgba(255,255,255,0.2)', margin: '6px 3px' }} />
 
           {/* Undo */}
-          <motion.button onClick={undo} whileTap={{ scale: 0.88 }}
+          <motion.button
+            onPointerDown={(e) => { e.stopPropagation(); undo(); }}
+            whileTap={{ scale: 0.85 }}
             style={{
-              width: 40, height: 40, borderRadius: 12,
-              background: history.length > 0 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+              width: 42, height: 42, borderRadius: 12,
+              background: histLen > 0 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
               border: '2px solid transparent', fontSize: '18px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              opacity: history.length > 0 ? 1 : 0.3,
+              opacity: histLen > 0 ? 1 : 0.3,
             }}
             title="Undo">
             ↩️
           </motion.button>
 
           {/* Clear */}
-          <motion.button onClick={clearAll} whileTap={{ scale: 0.88 }}
+          <motion.button
+            onPointerDown={(e) => { e.stopPropagation(); clearAll(); }}
+            whileTap={{ scale: 0.85 }}
             style={{
-              width: 40, height: 40, borderRadius: 12,
+              width: 42, height: 42, borderRadius: 12,
               background: 'rgba(239,68,68,0.2)',
-              border: '2px solid rgba(239,68,68,0.4)',
+              border: '2px solid rgba(239,68,68,0.5)',
               fontSize: '18px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
@@ -275,40 +320,37 @@ export function TeacherDrawingOverlay() {
           </motion.button>
         </div>
 
-        {/* Color swatches row */}
+        {/* Color swatches */}
         <div style={{
-          display: 'flex',
-          gap: 6,
-          background: 'rgba(15,25,45,0.92)',
-          backdropFilter: 'blur(12px)',
+          display: 'flex', gap: 5,
+          background: 'rgba(10,20,40,0.95)',
+          backdropFilter: 'blur(16px)',
           borderRadius: 24,
-          padding: '6px 10px',
-          border: '1.5px solid rgba(255,255,255,0.15)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+          padding: '7px 12px',
+          border: '1.5px solid rgba(255,255,255,0.18)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
         }}>
           {COLORS.map(c => (
             <motion.button key={c.hex}
-              onClick={() => setColor(c.hex)}
-              whileTap={{ scale: 0.85 }}
+              onPointerDown={(e) => { e.stopPropagation(); setColor(c.hex); }}
+              whileTap={{ scale: 0.8 }}
               style={{
                 width: 28, height: 28, borderRadius: '50%',
                 background: c.hex,
-                border: color === c.hex ? '3px solid white' : '2px solid rgba(255,255,255,0.3)',
+                border: color === c.hex ? '3px solid white' : '2px solid rgba(255,255,255,0.25)',
                 cursor: 'pointer',
-                boxShadow: color === c.hex ? `0 0 0 2px ${c.hex}, 0 0 12px ${c.hex}80` : 'none',
-                transition: 'all 0.15s',
+                boxShadow: color === c.hex ? `0 0 0 2px ${c.hex}, 0 0 14px ${c.hex}90` : 'none',
+                transition: 'all 0.12s',
               }}
               title={c.name}
             />
           ))}
         </div>
 
-        {/* Mode label */}
+        {/* Label */}
         <div style={{
-          fontSize: '10px',
-          color: 'rgba(255,255,255,0.5)',
-          fontFamily: 'Fredoka One, cursive',
-          letterSpacing: 1,
+          fontSize: '10px', color: 'rgba(255,255,255,0.55)',
+          fontFamily: 'Fredoka One, cursive', letterSpacing: 1,
           textTransform: 'uppercase',
         }}>
           🎓 Teacher Drawing Mode
