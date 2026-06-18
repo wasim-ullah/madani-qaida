@@ -157,6 +157,9 @@ body {
   }
 }
 
+/* Hide scrollbar inside bottom nav scroll row */
+.bottom-nav div::-webkit-scrollbar { display: none; }
+
 /* Landscape phone */
 @media (max-width: 767px) and (orientation: landscape) {
   .bottom-nav { height: 52px; }

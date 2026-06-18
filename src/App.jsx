@@ -291,7 +291,17 @@ export default function App() {
       ═══════════════════════════════ */}
       <nav className="bottom-nav fixed bottom-0 left-0 right-0 border-t"
         style={{ background: 'linear-gradient(0deg,#0d2d40,#1B4D6B)', borderColor: 'rgba(255,213,79,0.3)', zIndex: 200 }}>
-        <div style={{ display:'flex', height:'100%' }}>
+        {/* Scrollable row — each tab gets a fixed 72px width so names never crowd */}
+        <div style={{
+          display: 'flex',
+          height: '100%',
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          scrollSnapType: 'x mandatory',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',       /* Firefox */
+          msOverflowStyle: 'none',      /* IE/Edge */
+        }}>
           {NAV.map(item => {
             const isActive = activePage === item.id
             return (
@@ -299,18 +309,19 @@ export default function App() {
                 key={item.id}
                 onClick={() => setActivePage(item.id)}
                 style={{
-                  flex: 1,
+                  flex: '0 0 calc(100% / 6)',  /* exactly 1/6 of screen */
+                  minWidth: 64,                 /* never narrower than 64px */
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 3,
+                  gap: 4,
                   position: 'relative',
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  padding: 0,
-                  minWidth: 0,
+                  padding: '6px 0',
+                  scrollSnapAlign: 'start',
                 }}
               >
                 {/* Active highlight pill */}
@@ -319,7 +330,7 @@ export default function App() {
                     layoutId="mobileActiveTab"
                     style={{
                       position: 'absolute',
-                      top: 4, bottom: 4, left: 3, right: 3,
+                      top: 4, bottom: 4, left: 4, right: 4,
                       borderRadius: 14,
                       background: `linear-gradient(135deg,${item.gradient[0]},${item.gradient[1]})`,
                     }}
@@ -327,18 +338,18 @@ export default function App() {
                   />
                 )}
                 {/* Emoji */}
-                <span style={{ fontSize:'20px', lineHeight:1, position:'relative', zIndex:1 }}>
+                <span style={{ fontSize:'22px', lineHeight:1, position:'relative', zIndex:1 }}>
                   {item.emoji}
                 </span>
                 {/* Label */}
                 <span style={{
-                  fontSize: '9px',
+                  fontSize: '10px',
                   fontFamily: 'Fredoka One, cursive',
                   color: isActive ? '#FFD54F' : '#94A3B8',
                   lineHeight: 1,
                   position: 'relative',
                   zIndex: 1,
-                  letterSpacing: '0.2px',
+                  whiteSpace: 'nowrap',
                 }}>
                   {item.label}
                 </span>
