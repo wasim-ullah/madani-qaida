@@ -105,38 +105,60 @@ body {
 .bubble-btn:hover  { transform: translateY(-2px); box-shadow: 0 7px 0 rgba(0,0,0,0.18); }
 .bubble-btn:active { transform: translateY(2px);  box-shadow: 0 2px 0 rgba(0,0,0,0.18); }
 
-/* ── Web layout sidebar ─────────────  */
+/* ── Layout ─────────────────────────  */
 
-/* Default (desktop) */
+/* Desktop — horizontal: sidebar + content */
 .app-shell {
   display: flex;
+  flex-direction: row;
   height: 100svh;
   overflow: hidden;
 }
 .sidebar { display: flex; }
 .page-scroll { height: 100svh; overflow-y: auto; }
 
+/* Mobile — vertical stack: sticky header + scroll area + fixed nav */
 @media (max-width: 767px) {
-  .app-shell { display: block; height: auto; overflow: visible; }
+  .app-shell {
+    display: flex;
+    flex-direction: column;
+    height: 100svh;
+    overflow: hidden;
+  }
   .sidebar { display: none !important; }
   .bottom-nav { display: flex !important; }
-  /* mobile top header ≈ 60px + 56px bottom nav */
   .page-scroll {
-    height: calc(100svh - 60px - 60px - env(safe-area-inset-bottom, 0px));
+    flex: 1;
     overflow-y: auto;
-    padding-bottom: 4px;
+    /* extra bottom padding so content isn't hidden under fixed nav */
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
   }
 }
 
 /* ── Mobile bottom nav ──────────────  */
 .bottom-nav {
-  display: none;        /* hidden by default; media query shows on mobile */
-  height: 60px;
+  display: none;          /* hidden by default; media query shows on mobile */
+  height: 64px;
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
 }
 
-/* Landscape phone: reduce nav height */
+/* ── Mobile sticky header ───────────  */
+.mobile-header { display: none; }
+
+@media (max-width: 767px) {
+  .mobile-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    position: sticky;
+    top: 0;
+  }
+}
+
+/* Landscape phone */
 @media (max-width: 767px) and (orientation: landscape) {
-  .bottom-nav { height: 48px; }
-  .page-scroll { height: calc(100svh - 56px - 48px); }
+  .bottom-nav { height: 52px; }
+  .mobile-header { padding: 6px 16px; }
 }

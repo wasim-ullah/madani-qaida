@@ -224,33 +224,44 @@ export default function App() {
       {/* ═══════════════════════════════
           MAIN CONTENT AREA
       ═══════════════════════════════ */}
-      <div className="flex-1 flex flex-col min-w-0" style={{ position: 'relative' }}>
+      <div className="flex-1 flex flex-col min-w-0" style={{ position: 'relative', overflow: 'hidden' }}>
         <TeacherDrawingOverlay />
 
-        {/* ── Mobile top bar ────────── */}
-        <header className="flex md:hidden items-center justify-between px-4 py-3 shadow-lg shrink-0 relative overflow-hidden"
-          style={{ background: `linear-gradient(135deg,${activeNav.gradient[0]},${activeNav.gradient[1]})`, zIndex: 200 }}>
+        {/* ── Mobile sticky header ─────── */}
+        <header
+          style={{
+            display: 'none',       /* shown via media query below */
+            background: `linear-gradient(135deg,${activeNav.gradient[0]},${activeNav.gradient[1]})`,
+            zIndex: 200,
+            position: 'relative',
+            overflow: 'hidden',
+            flexShrink: 0,
+          }}
+          className="mobile-header"
+        >
           <Cloud style={{ position:'absolute', top:'-5px', right:'-10px', width:'100px', opacity:0.12 }} />
-          <div className="flex items-center gap-2 relative z-10">
-            <span className="text-3xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
+
+          {/* Left: current page name */}
+          <div style={{ display:'flex', alignItems:'center', gap:8, position:'relative', zIndex:1 }}>
+            <span style={{ fontSize:'28px', filter:'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
               {activeNav.emoji}
             </span>
             <div>
-              <h1 className="font-extrabold text-white text-base leading-tight"
-                style={{ fontFamily: 'Fredoka One, cursive' }}>
+              <div style={{ fontFamily:'Fredoka One,cursive', fontSize:'16px', fontWeight:900, color:'white', lineHeight:1.2 }}>
                 {activeNav.label}
-              </h1>
-              <p style={{ fontFamily:'IndoPak Nastaleeq,serif', color: '#FFD54F', fontSize: '14px', direction: 'rtl', lineHeight: 1 }}>
+              </div>
+              <div style={{ fontFamily:'IndoPak Nastaleeq,serif', color:'#FFD54F', fontSize:'13px', direction:'rtl', lineHeight:1 }}>
                 {activeNav.arabic}
-              </p>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 relative z-10">
+
+          {/* Right: teacher toggle + stars + avatar */}
+          <div style={{ display:'flex', alignItems:'center', gap:8, position:'relative', zIndex:1 }}>
             <TeacherModeToggle compact />
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full"
-              style={{ backgroundColor: 'rgba(255,255,255,0.2)', border: '1.5px solid rgba(255,255,255,0.4)' }}>
-              <span style={{ fontSize: '16px' }}>⭐</span>
-              <span className="font-extrabold" style={{ color: '#FFD54F', fontFamily: 'Fredoka One, cursive', fontSize: '15px' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:4, padding:'4px 8px', borderRadius:20, backgroundColor:'rgba(255,255,255,0.2)', border:'1.5px solid rgba(255,255,255,0.4)' }}>
+              <span style={{ fontSize:'15px' }}>⭐</span>
+              <span style={{ color:'#FFD54F', fontFamily:'Fredoka One,cursive', fontSize:'15px', fontWeight:900 }}>
                 {progress.totalStars}
               </span>
             </div>
@@ -280,7 +291,7 @@ export default function App() {
       ═══════════════════════════════ */}
       <nav className="bottom-nav fixed bottom-0 left-0 right-0 border-t"
         style={{ background: 'linear-gradient(0deg,#0d2d40,#1B4D6B)', borderColor: 'rgba(255,213,79,0.3)', zIndex: 200 }}>
-        <div style={{ display: 'flex', height: '100%', alignItems: 'stretch' }}>
+        <div style={{ display:'flex', height:'100%' }}>
           {NAV.map(item => {
             const isActive = activePage === item.id
             return (
@@ -293,49 +304,41 @@ export default function App() {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 2,
+                  gap: 3,
                   position: 'relative',
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  padding: '4px 0',
+                  padding: 0,
                   minWidth: 0,
-                  overflow: 'hidden',
                 }}
               >
+                {/* Active highlight pill */}
                 {isActive && (
                   <motion.div
                     layoutId="mobileActiveTab"
                     style={{
                       position: 'absolute',
-                      inset: '3px 2px',
-                      borderRadius: 12,
+                      top: 4, bottom: 4, left: 3, right: 3,
+                      borderRadius: 14,
                       background: `linear-gradient(135deg,${item.gradient[0]},${item.gradient[1]})`,
                     }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    transition={{ type:'spring', stiffness:400, damping:30 }}
                   />
                 )}
-                <span style={{
-                  fontSize: '18px',
-                  lineHeight: 1,
-                  position: 'relative',
-                  zIndex: 1,
-                }}>
+                {/* Emoji */}
+                <span style={{ fontSize:'20px', lineHeight:1, position:'relative', zIndex:1 }}>
                   {item.emoji}
                 </span>
+                {/* Label */}
                 <span style={{
                   fontSize: '9px',
                   fontFamily: 'Fredoka One, cursive',
                   color: isActive ? '#FFD54F' : '#94A3B8',
+                  lineHeight: 1,
                   position: 'relative',
                   zIndex: 1,
-                  lineHeight: 1,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  maxWidth: '100%',
-                  paddingLeft: 2,
-                  paddingRight: 2,
+                  letterSpacing: '0.2px',
                 }}>
                   {item.label}
                 </span>
